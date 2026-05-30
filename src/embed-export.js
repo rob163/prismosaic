@@ -1,4 +1,4 @@
-import { downloadBlob, timestampedFilename } from "./media-export.js?v=20260530-3";
+import { downloadBlob, timestampedFilename } from "./media-export.js?v=20260530-4";
 
 const ASSET_BASE_PATH = "/prismosaic";
 
@@ -116,37 +116,51 @@ function createReactComponentSource() {
   return `"use client";
 
 import type { CSSProperties } from "react";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { mountPrismosaicLoop } from "../../lib/prismosaic/mount-prismosaic-loop";
-import { prismosaicRecipe } from "./prismosaic-recipe";
+import { prismosaicRecipe, type PrismosaicRecipe } from "./prismosaic-recipe";
 
 type PrismosaicLoopProps = {
+  ariaLabel?: string;
+  assetBasePath?: string;
   className?: string;
+  recipe?: PrismosaicRecipe;
   style?: CSSProperties;
   paused?: boolean;
 };
 
-export function PrismosaicLoop({ className, style, paused = false }: PrismosaicLoopProps) {
+export function PrismosaicLoop({
+  ariaLabel = "Prismosaic animated mosaic",
+  assetBasePath,
+  className,
+  recipe = prismosaicRecipe,
+  style,
+  paused = false,
+}: PrismosaicLoopProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const activeRecipe = useMemo(
+    () => (assetBasePath ? { ...recipe, assetBasePath } : recipe),
+    [assetBasePath, recipe],
+  );
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const loop = mountPrismosaicLoop(canvas, prismosaicRecipe, { paused });
+    const loop = mountPrismosaicLoop(canvas, activeRecipe, { paused });
     return () => loop.destroy();
-  }, [paused]);
+  }, [activeRecipe, paused]);
 
   return (
     <canvas
       ref={canvasRef}
       className={className}
-      aria-label="Prismosaic animated mosaic"
+      aria-label={ariaLabel}
       style={{
         display: "block",
         width: "100%",
         height: "auto",
-        aspectRatio: \`\${prismosaicRecipe.width} / \${prismosaicRecipe.height}\`,
+        aspectRatio: \`\${activeRecipe.width} / \${activeRecipe.height}\`,
         ...style,
       }}
     />
@@ -159,6 +173,7 @@ function createRuntimeSource() {
   return `${createRecipeTypeSource()}
 
 type PrismosaicLoopOptions = {
+  assetBasePath?: string;
   paused?: boolean;
 };
 
@@ -176,20 +191,27 @@ export function mountPrismosaicLoop(
   recipe: PrismosaicRecipe,
   options: PrismosaicLoopOptions = {},
 ): PrismosaicLoopHandle {
-  const ctx = canvas.getContext("2d", { alpha: false });
+  const ctx = getCanvasContext(canvas);
   if (!ctx) {
-    throw new Error("Could not create a 2D canvas context.");
+    return createNoopHandle();
   }
 
-  canvas.width = recipe.width;
-  canvas.height = recipe.height;
+  if (typeof window === "undefined" || typeof Image === "undefined") {
+    console.warn("Prismosaic loop requires a browser-like environment with window and Image.");
+    return createNoopHandle();
+  }
+
+  const activeRecipe = options.assetBasePath ? { ...recipe, assetBasePath: options.assetBasePath } : recipe;
+
+  canvas.width = activeRecipe.width;
+  canvas.height = activeRecipe.height;
 
   let sources: LoadedSource[] = [];
   let sourceMap: number[][] = [];
   let timer = 0;
   let destroyed = false;
 
-  loadRecipeSources(recipe)
+  loadRecipeSources(activeRecipe)
     .then((loadedSources) => {
       if (destroyed) return;
       sources = loadedSources;
@@ -203,8 +225,8 @@ export function mountPrismosaicLoop(
   function start() {
     stop();
     timer = window.setInterval(() => {
-      drawRandomTiles(recipe.settings.tilesPerFrame);
-    }, recipe.settings.frameInterval);
+      drawRandomTiles(activeRecipe.settings.tilesPerFrame);
+    }, activeRecipe.settings.frameInterval);
   }
 
   function stop() {
@@ -220,7 +242,7 @@ export function mountPrismosaicLoop(
   function renderStill() {
     clear();
     randomizeSourceMap();
-    const { cols, rows } = getGridDimensions(recipe);
+    const { cols, rows } = getGridDimensions(activeRecipe);
     for (let row = 0; row < rows; row += 1) {
       for (let col = 0; col < cols; col += 1) {
         drawTile(col, row);
@@ -235,8 +257,8 @@ export function mountPrismosaicLoop(
 
   function randomizeSourceMap() {
     sourceMap = [];
-    const activeChannels = getActiveChannels(recipe, sources);
-    const { cols, rows } = getGridDimensions(recipe);
+    const activeChannels = getActiveChannels(activeRecipe, sources);
+    const { cols, rows } = getGridDimensions(activeRecipe);
     for (let row = 0; row < rows; row += 1) {
       sourceMap[row] = [];
       for (let col = 0; col < cols; col += 1) {
@@ -247,8 +269,8 @@ export function mountPrismosaicLoop(
 
   function drawRandomTiles(count: number) {
     if (!sources.length) return;
-    const activeChannels = getActiveChannels(recipe, sources);
-    const { cols, rows } = getGridDimensions(recipe);
+    const activeChannels = getActiveChannels(activeRecipe, sources);
+    const { cols, rows } = getGridDimensions(activeRecipe);
     for (let index = 0; index < count; index += 1) {
       const col = randomInt(0, cols - 1);
       const row = randomInt(0, rows - 1);
@@ -261,22 +283,22 @@ export function mountPrismosaicLoop(
   function drawTile(col: number, row: number) {
     if (!sources.length) return;
 
-    const { cols, rows } = getGridDimensions(recipe);
+    const { cols, rows } = getGridDimensions(activeRecipe);
     const [x0, x1] = tileBounds(col, cols, canvas.width);
     const [y0, y1] = tileBounds(row, rows, canvas.height);
     const cellWidth = x1 - x0;
     const cellHeight = y1 - y0;
     if (cellWidth <= 0 || cellHeight <= 0) return;
 
-    const tileScale = recipe.settings.tileScale;
+    const tileScale = activeRecipe.settings.tileScale;
     const tileWidth = Math.max(1, Math.round(cellWidth * tileScale));
     const tileHeight = Math.max(1, Math.round(cellHeight * tileScale));
     const centerX = (x0 + x1) / 2;
     const centerY = (y0 + y1) / 2;
     const dx = Math.round(centerX - tileWidth / 2);
     const dy = Math.round(centerY - tileHeight / 2);
-    const jitterX = Math.round(cellWidth * recipe.settings.sourceJitter);
-    const jitterY = Math.round(cellHeight * recipe.settings.sourceJitter);
+    const jitterX = Math.round(cellWidth * activeRecipe.settings.sourceJitter);
+    const jitterY = Math.round(cellHeight * activeRecipe.settings.sourceJitter);
     const sx = clamp(
       Math.round(centerX - tileWidth / 2) + randomInt(-jitterX, jitterX),
       0,
@@ -288,7 +310,7 @@ export function mountPrismosaicLoop(
       Math.max(0, canvas.height - tileHeight),
     );
 
-    const activeChannels = getActiveChannels(recipe, sources);
+    const activeChannels = getActiveChannels(activeRecipe, sources);
     const channelIndex = sourceMap[row]?.[col] ?? pickChannelIndex(activeChannels);
     const channel = activeChannels[channelIndex] || activeChannels[0];
     const source = sources[channel.sourceIndex];
@@ -307,8 +329,8 @@ export function mountPrismosaicLoop(
 
   function paintTint(x: number, y: number, width: number, height: number, hex: string) {
     ctx.save();
-    ctx.globalCompositeOperation = recipe.settings.blendMode;
-    ctx.globalAlpha = recipe.settings.colorStrength;
+    ctx.globalCompositeOperation = activeRecipe.settings.blendMode;
+    ctx.globalAlpha = activeRecipe.settings.colorStrength;
     ctx.fillStyle = hex;
     ctx.fillRect(x, y, width, height);
     ctx.restore();
@@ -321,6 +343,24 @@ export function mountPrismosaicLoop(
   }
 
   return { start, stop, renderStill, destroy };
+}
+
+function getCanvasContext(canvas: HTMLCanvasElement) {
+  try {
+    return canvas.getContext?.("2d", { alpha: false }) ?? null;
+  } catch (error) {
+    console.warn("Prismosaic loop could not create a 2D canvas context.", error);
+    return null;
+  }
+}
+
+function createNoopHandle(): PrismosaicLoopHandle {
+  return {
+    start() {},
+    stop() {},
+    renderStill() {},
+    destroy() {},
+  };
 }
 
 async function loadRecipeSources(recipe: PrismosaicRecipe): Promise<LoadedSource[]> {
@@ -415,10 +455,44 @@ README.md
 If the editor used more than one source image, the \`public/prismosaic/\` folder
 will contain \`source-1.webp\`, \`source-2.webp\`, and so on.
 
+## Recommended Project Layout
+
+After copying, keep this shape in your target project:
+
+\`\`\`txt
+your-project/
+  src/
+    components/
+      prismosaic/
+        PrismosaicLoop.tsx
+        prismosaic-recipe.ts
+    lib/
+      prismosaic/
+        mount-prismosaic-loop.ts
+  public/
+    prismosaic/
+      source-0.webp
+\`\`\`
+
+If your project does not use a \`src/\` directory, this root-level layout also
+works:
+
+\`\`\`txt
+your-project/
+  components/prismosaic/...
+  lib/prismosaic/...
+  public/prismosaic/source-0.webp
+\`\`\`
+
+The important part is that \`components/\` and \`lib/\` stay at the same relative
+level, and that the image files stay publicly reachable under
+\`/prismosaic/source-0.webp\`.
+
 ## Next.js App Router
 
-Copy the exported \`components/\`, \`lib/\`, and \`public/\` folders into the root
-of your Next.js project.
+Copy the exported \`components/\`, \`lib/\`, and \`public/\` folders into your
+project root, or copy \`components/\` and \`lib/\` under \`src/\` if that is how
+your project is organized.
 
 Use the component from any Server or Client Component:
 
@@ -436,6 +510,27 @@ export default function Page() {
 
 The exported component already contains \`"use client"\`, so it can safely use
 Canvas, timers, and browser image loading inside the App Router.
+
+You can customize the accessible label and asset path without editing the recipe
+file:
+
+\`\`\`tsx
+<PrismosaicLoop
+  ariaLabel="Animated mosaic study"
+  assetBasePath="/my-site/prismosaic"
+/>
+\`\`\`
+
+Advanced usage can pass a different recipe object:
+
+\`\`\`tsx
+import { PrismosaicLoop } from "@/components/prismosaic/PrismosaicLoop";
+import { prismosaicRecipe } from "@/components/prismosaic/prismosaic-recipe";
+
+export default function Page() {
+  return <PrismosaicLoop recipe={prismosaicRecipe} />;
+}
+\`\`\`
 
 ## Adjusting Display Size
 
@@ -535,11 +630,68 @@ React:
 Framework-neutral:
 
 \`\`\`ts
-const loop = mountPrismosaicLoop(canvas, prismosaicRecipe, { paused: true });
+const loop = mountPrismosaicLoop(canvas, prismosaicRecipe, {
+  assetBasePath: "/my-site/prismosaic",
+  paused: true,
+});
 loop.renderStill();
 loop.start();
 loop.stop();
 \`\`\`
+
+## Troubleshooting
+
+### The canvas is blank
+
+Open the first exported asset directly in the browser:
+
+\`\`\`txt
+/prismosaic/source-0.webp
+\`\`\`
+
+If that URL returns 404, the \`public/prismosaic/\` folder is missing or copied to
+the wrong place. Copy it to your app's public/static asset folder, or update
+\`assetBasePath\`.
+
+### The app is deployed under a subpath
+
+Pass an explicit asset path:
+
+\`\`\`tsx
+<PrismosaicLoop assetBasePath="/my-subpath/prismosaic" />
+\`\`\`
+
+Or edit \`assetBasePath\` in \`components/prismosaic/prismosaic-recipe.ts\`.
+
+### Vitest or Jest says getContext is not implemented
+
+Browser test environments such as jsdom may not implement Canvas 2D. The runtime
+returns a no-op handle when it cannot create a 2D context, but tests that assert
+canvas behavior should still add a mock:
+
+\`\`\`ts
+HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
+  drawImage: vi.fn(),
+  fillRect: vi.fn(),
+  save: vi.fn(),
+  restore: vi.fn(),
+}));
+\`\`\`
+
+Use \`jest.fn\` instead of \`vi.fn\` in Jest.
+
+### TypeScript reports errors from the exported source folder
+
+Copy only the generated \`components/\`, \`lib/\`, and \`public/\` folders into
+your app. Do not leave an extra unmodified export or bootstrap directory inside
+your project's TypeScript include paths. If you keep the downloaded export folder
+for reference, place it outside the app source tree or exclude it in
+\`tsconfig.json\`.
+
+### The animation works locally but not after deploy
+
+Check the deployed URL for \`/prismosaic/source-0.webp\` first. Most production
+issues are asset-path issues rather than React or Canvas issues.
 
 ## Notes
 

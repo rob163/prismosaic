@@ -1,14 +1,14 @@
-import { normalizeImages, loadImageFile, createDemoImage } from "./image-fit.js?v=20260530-3";
-import { MosaicEngine } from "./mosaic-engine.js?v=20260530-3";
-import { exportNextEmbedZip } from "./embed-export.js?v=20260530-3";
-import { downloadBlob, downloadCanvasPng, recordCanvasWebm, timestampedFilename } from "./media-export.js?v=20260530-3";
+import { normalizeImages, loadImageFile, createDemoImage } from "./image-fit.js?v=20260530-4";
+import { MosaicEngine } from "./mosaic-engine.js?v=20260530-4";
+import { exportNextEmbedZip } from "./embed-export.js?v=20260530-4";
+import { downloadBlob, downloadCanvasPng, recordCanvasWebm, timestampedFilename } from "./media-export.js?v=20260530-4";
 import {
   APP_VERSION,
   COLOR_PRESETS,
   CONTROL_CONFIG,
   DEFAULT_SETTINGS,
   OUTPUT_PRESETS,
-} from "./config.js?v=20260530-3";
+} from "./config.js?v=20260530-4";
 
 const elements = {
   canvas: document.querySelector("#mosaic"),
