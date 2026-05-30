@@ -1,13 +1,14 @@
-import { normalizeImages, loadImageFile, createDemoImage } from "./image-fit.js?v=20260530-3";
-import { MosaicEngine } from "./mosaic-engine.js?v=20260530-3";
-import { downloadBlob, downloadCanvasPng, recordCanvasWebm, timestampedFilename } from "./media-export.js?v=20260530-3";
+import { normalizeImages, loadImageFile, createDemoImage } from "./image-fit.js?v=20260530-4";
+import { MosaicEngine } from "./mosaic-engine.js?v=20260530-4";
+import { exportNextEmbedZip } from "./embed-export.js?v=20260530-4";
+import { downloadBlob, downloadCanvasPng, recordCanvasWebm, timestampedFilename } from "./media-export.js?v=20260530-4";
 import {
   APP_VERSION,
   COLOR_PRESETS,
   CONTROL_CONFIG,
   DEFAULT_SETTINGS,
   OUTPUT_PRESETS,
-} from "./config.js?v=20260530-3";
+} from "./config.js?v=20260530-4";
 
 const elements = {
   canvas: document.querySelector("#mosaic"),
@@ -54,6 +55,7 @@ const elements = {
   toggle: document.querySelector("#toggle"),
   downloadPng: document.querySelector("#downloadPng"),
   downloadWebm: document.querySelector("#downloadWebm"),
+  downloadEmbed: document.querySelector("#downloadEmbed"),
 };
 
 const state = {
@@ -181,6 +183,7 @@ function bindEvents() {
   elements.toggle.addEventListener("click", togglePlayback);
   elements.downloadPng.addEventListener("click", () => downloadCanvasPng(elements.canvas));
   elements.downloadWebm.addEventListener("click", downloadWebm);
+  elements.downloadEmbed.addEventListener("click", downloadEmbedZip);
 }
 
 async function handleFiles(event) {
@@ -362,5 +365,43 @@ async function downloadWebm() {
     elements.downloadWebm.disabled = false;
     state.running = wasRunning;
     if (state.running) engine.start();
+  }
+}
+
+async function downloadEmbedZip() {
+  if (state.recording) return;
+
+  readSettings();
+  state.recording = true;
+  elements.downloadEmbed.disabled = true;
+  elements.status.textContent = "Preparing embed ZIP...";
+
+  try {
+    const output = OUTPUT_PRESETS[state.settings.outputPreset];
+    const colorPreset = COLOR_PRESETS[state.settings.colorPreset];
+    await exportNextEmbedZip({
+      appVersion: APP_VERSION,
+      sources: engine.sources,
+      recipe: {
+        width: output.width,
+        height: output.height,
+        settings: {
+          gridSize: state.settings.gridSize,
+          tilesPerFrame: state.settings.tilesPerFrame,
+          frameInterval: state.settings.frameInterval,
+          tileScale: state.settings.tileScale,
+          sourceJitter: state.settings.sourceJitter,
+          colorStrength: state.settings.colorStrength,
+          blendMode: colorPreset.blendMode,
+          channels: getChannelSettings(),
+        },
+      },
+    });
+    elements.status.textContent = "Embed ZIP exported";
+  } catch (error) {
+    elements.status.textContent = error.message;
+  } finally {
+    state.recording = false;
+    elements.downloadEmbed.disabled = false;
   }
 }

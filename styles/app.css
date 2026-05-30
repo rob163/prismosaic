@@ -223,7 +223,8 @@ button:disabled {
 }
 
 #downloadPng,
-#downloadWebm {
+#downloadWebm,
+#downloadEmbed {
   grid-column: span 2;
 }
 
@@ -247,7 +248,8 @@ button:disabled {
   }
 
   #downloadPng,
-  #downloadWebm {
+  #downloadWebm,
+  #downloadEmbed {
     grid-column: auto;
   }
 }
