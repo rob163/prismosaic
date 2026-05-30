@@ -45,11 +45,18 @@ body {
   overflow: hidden;
 }
 
+.canvas-shell {
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
 #mosaic {
+  position: absolute;
+  left: 0;
+  top: 0;
   display: block;
-  width: min(100%, calc((100vh - 36px) * 1));
-  max-height: calc(100vh - 36px);
-  height: auto;
+  transform-origin: top left;
   background: #050607;
   border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow: 0 22px 80px rgba(0, 0, 0, 0.45);
@@ -223,11 +230,6 @@ button:disabled {
 @media (max-width: 900px) {
   .app-shell {
     grid-template-columns: 1fr;
-  }
-
-  #mosaic {
-    width: 100%;
-    max-height: none;
   }
 
   .panel {

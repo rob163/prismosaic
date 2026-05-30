@@ -1,4 +1,4 @@
-export const APP_VERSION = "2026.05.12.3";
+export const APP_VERSION = "2026.05.30.3";
 
 export const OUTPUT_PRESETS = {
   square: { label: "Square", width: 1080, height: 1080 },
