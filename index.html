@@ -4,79 +4,80 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Prismosaic</title>
-    <link rel="stylesheet" href="styles/app.css?v=20260530-4" />
+    <link rel="stylesheet" href="styles/app.css?v=20260530-5" />
   </head>
   <body>
     <main class="app-shell">
-      <section class="stage" aria-label="Prismosaic preview">
+      <section class="stage" aria-label="Prismosaic preview" data-i18n-aria-label="aria.preview">
         <div class="canvas-shell">
           <canvas id="mosaic" width="1080" height="1080"></canvas>
         </div>
       </section>
 
-      <aside class="panel" aria-label="Prismosaic controls">
+      <aside class="panel" aria-label="Prismosaic controls" data-i18n-aria-label="aria.controls">
         <header class="brand">
           <div>
             <h1>Prismosaic</h1>
-            <p id="status">Preparing canvas...</p>
+            <p id="status" data-i18n="status.preparingCanvas">Preparing canvas...</p>
           </div>
+          <label class="language-control" title="Switches the control language. The exported embed package remains English-only." data-i18n-title="hints.language">
+            <span data-i18n="fields.language">Language</span>
+            <select id="language"></select>
+          </label>
         </header>
 
         <section class="control-group">
           <label class="upload" for="fileInput">
             <input id="fileInput" type="file" accept="image/*" multiple />
-            <span id="uploadLabel">Upload 1-3 images</span>
+            <span id="uploadLabel" data-i18n="upload">Upload 1-3 images</span>
           </label>
 
           <label
             title="Final export canvas size. Pick Story/Reel for vertical social video, Portrait for feed posts, or Square for profile-friendly output."
+            data-i18n-title="hints.output"
           >
-            <span>Output <span class="hint">?</span></span>
+            <span><span data-i18n="fields.output">Output</span> <span class="hint">?</span></span>
             <select id="outputPreset"></select>
           </label>
         </section>
 
         <section class="control-group">
-          <div class="section-title">Image Fit</div>
+          <div class="section-title" data-i18n="groups.imageFit">Image Fit</div>
           <label
             title="How uploaded images are mapped into the output canvas. Fill crop covers the full frame; Fit full image preserves the entire photo."
+            data-i18n-title="hints.framing"
           >
-            <span>Framing <span class="hint">?</span></span>
-            <select id="fitMode">
-              <option value="cover">Fill crop</option>
-              <option value="contain">Fit full image</option>
-            </select>
+            <span><span data-i18n="fields.framing">Framing</span> <span class="hint">?</span></span>
+            <select id="fitMode"></select>
           </label>
 
           <label
             title="Background used when the photo does not fill the frame. Blur fill extends the photo softly; Black fill leaves a dark matte."
+            data-i18n-title="hints.background"
           >
-            <span>Background <span class="hint">?</span></span>
-            <select id="backgroundMode">
-              <option value="blur">Blur fill</option>
-              <option value="solid">Black fill</option>
-            </select>
+            <span><span data-i18n="fields.background">Background</span> <span class="hint">?</span></span>
+            <select id="backgroundMode"></select>
           </label>
 
-          <label title="Scales the uploaded image before mosaic sampling. Use this to crop tighter or reveal more of the source photo.">
+          <label title="Scales the uploaded image before mosaic sampling. Use this to crop tighter or reveal more of the source photo." data-i18n-title="hints.zoom">
             <span class="row">
-              <span>Zoom <span class="hint">?</span></span>
+              <span><span data-i18n="fields.zoom">Zoom</span> <span class="hint">?</span></span>
               <output id="zoomValue">1.00x</output>
             </span>
             <input id="zoom" type="range" min="70" max="180" value="100" step="1" />
           </label>
 
-          <label title="Moves the normalized source image left or right inside the output frame.">
+          <label title="Moves the normalized source image left or right inside the output frame." data-i18n-title="hints.offsetX">
             <span class="row">
-              <span>Position X <span class="hint">?</span></span>
+              <span><span data-i18n="fields.offsetX">Position X</span> <span class="hint">?</span></span>
               <output id="offsetXValue">0%</output>
             </span>
             <input id="offsetX" type="range" min="-50" max="50" value="0" step="1" />
           </label>
 
-          <label title="Moves the normalized source image up or down inside the output frame.">
+          <label title="Moves the normalized source image up or down inside the output frame." data-i18n-title="hints.offsetY">
             <span class="row">
-              <span>Position Y <span class="hint">?</span></span>
+              <span><span data-i18n="fields.offsetY">Position Y</span> <span class="hint">?</span></span>
               <output id="offsetYValue">0%</output>
             </span>
             <input id="offsetY" type="range" min="-50" max="50" value="0" step="1" />
@@ -84,11 +85,12 @@
         </section>
 
         <section class="control-group">
-          <div class="section-title">Mosaic</div>
+          <div class="section-title" data-i18n="groups.mosaic">Mosaic</div>
           <label
             title="Three-color tint set used across the mosaic sources. Different presets change the character of the color deflection."
+            data-i18n-title="hints.colorPreset"
           >
-            <span>Color preset <span class="hint">?</span></span>
+            <span><span data-i18n="fields.colorPreset">Color preset</span> <span class="hint">?</span></span>
             <select id="colorPreset"></select>
           </label>
 
@@ -96,67 +98,69 @@
             class="channel-controls"
             aria-label="Tint channels"
             title="Each tint channel can use a custom color and can sample from any uploaded image. Set a channel to Off to remove it from random tile selection."
+            data-i18n-aria-label="aria.tintChannels"
+            data-i18n-title="hints.channelControls"
           >
             <label class="channel-row">
-              <span>Channel 1</span>
+              <span data-i18n="channels.1">Channel 1</span>
               <input id="channelColor0" type="color" />
               <select id="channelSource0"></select>
             </label>
             <label class="channel-row">
-              <span>Channel 2</span>
+              <span data-i18n="channels.2">Channel 2</span>
               <input id="channelColor1" type="color" />
               <select id="channelSource1"></select>
             </label>
             <label class="channel-row">
-              <span>Channel 3</span>
+              <span data-i18n="channels.3">Channel 3</span>
               <input id="channelColor2" type="color" />
               <select id="channelSource2"></select>
             </label>
           </div>
 
-          <label title="Number of mosaic cells on the longer output side. The shorter side is calculated from the output ratio so tiles stay close to square.">
+          <label title="Number of mosaic cells on the longer output side. The shorter side is calculated from the output ratio so tiles stay close to square." data-i18n-title="hints.gridSize">
             <span class="row">
-              <span>Grid size <span class="hint">?</span></span>
+              <span><span data-i18n="fields.gridSize">Grid size</span> <span class="hint">?</span></span>
               <output id="gridValue">28x28</output>
             </span>
             <input id="grid" type="range" />
           </label>
 
-          <label title="How many random cells are replaced on each animation tick. Higher values produce faster visual change.">
+          <label title="How many random cells are replaced on each animation tick. Higher values produce faster visual change." data-i18n-title="hints.tilesPerFrame">
             <span class="row">
-              <span>Tiles per frame <span class="hint">?</span></span>
+              <span><span data-i18n="fields.tilesPerFrame">Tiles per frame</span> <span class="hint">?</span></span>
               <output id="tilesValue">48</output>
             </span>
             <input id="tilesPerFrame" type="range" min="1" max="220" value="48" step="1" />
           </label>
 
-          <label title="Delay between animation ticks. Smaller values update faster.">
+          <label title="Delay between animation ticks. Smaller values update faster." data-i18n-title="hints.frameInterval">
             <span class="row">
-              <span>Frame interval <span class="hint">?</span></span>
+              <span><span data-i18n="fields.frameInterval">Frame interval</span> <span class="hint">?</span></span>
               <output id="intervalValue">80 ms</output>
             </span>
             <input id="frameInterval" type="range" min="20" max="500" value="80" step="10" />
           </label>
 
-          <label title="Relative tile crop and draw size. Above 1 overlaps neighboring cells; below 1 reveals the background between tiles.">
+          <label title="Relative tile crop and draw size. Above 1 overlaps neighboring cells; below 1 reveals the background between tiles." data-i18n-title="hints.tileScale">
             <span class="row">
-              <span>Tile scale <span class="hint">?</span></span>
+              <span><span data-i18n="fields.tileScale">Tile scale</span> <span class="hint">?</span></span>
               <output id="scaleValue">1.08x</output>
             </span>
             <input id="tileScale" type="range" min="70" max="180" value="108" step="1" />
           </label>
 
-          <label title="Random offset between a tile position and the source crop position. 0 keeps source sampling aligned.">
+          <label title="Random offset between a tile position and the source crop position. 0 keeps source sampling aligned." data-i18n-title="hints.sourceJitter">
             <span class="row">
-              <span>Source jitter <span class="hint">?</span></span>
+              <span><span data-i18n="fields.sourceJitter">Source jitter</span> <span class="hint">?</span></span>
               <output id="jitterValue">12%</output>
             </span>
             <input id="sourceJitter" type="range" min="0" max="100" value="12" step="1" />
           </label>
 
-          <label title="Opacity of the selected color tint applied to each tile after the photo tile is drawn.">
+          <label title="Opacity of the selected color tint applied to each tile after the photo tile is drawn." data-i18n-title="hints.colorStrength">
             <span class="row">
-              <span>Color strength <span class="hint">?</span></span>
+              <span><span data-i18n="fields.colorStrength">Color strength</span> <span class="hint">?</span></span>
               <output id="colorValue">28%</output>
             </span>
             <input id="colorStrength" type="range" min="0" max="80" value="28" step="1" />
@@ -164,26 +168,26 @@
         </section>
 
         <section class="control-group">
-          <div class="section-title">Export</div>
-          <label title="Duration of the recorded WebM loop. Longer clips take more time and create larger files.">
+          <div class="section-title" data-i18n="groups.export">Export</div>
+          <label title="Duration of the recorded WebM loop. Longer clips take more time and create larger files." data-i18n-title="hints.loopDuration">
             <span class="row">
-              <span>Loop duration <span class="hint">?</span></span>
+              <span><span data-i18n="fields.loopDuration">Loop duration</span> <span class="hint">?</span></span>
               <output id="durationValue">5s</output>
             </span>
             <input id="loopDuration" type="range" min="1" max="10" value="5" step="1" />
           </label>
 
           <div class="button-grid">
-            <button id="toggle" type="button">Pause</button>
-            <button id="reroll" type="button">Reroll</button>
-            <button id="downloadPng" type="button">Download PNG</button>
-            <button id="downloadWebm" type="button">Download WebM</button>
-            <button id="downloadEmbed" type="button">Download Embed ZIP</button>
+            <button id="toggle" type="button" data-i18n="buttons.pause">Pause</button>
+            <button id="reroll" type="button" data-i18n="buttons.reroll">Reroll</button>
+            <button id="downloadPng" type="button" data-i18n="buttons.downloadPng">Download PNG</button>
+            <button id="downloadWebm" type="button" data-i18n="buttons.downloadWebm">Download WebM</button>
+            <button id="downloadEmbed" type="button" data-i18n="buttons.downloadEmbed">Download Embed ZIP</button>
           </div>
         </section>
       </aside>
     </main>
 
-    <script type="module" src="src/main.js?v=20260530-4"></script>
+    <script type="module" src="src/main.js?v=20260530-5"></script>
   </body>
 </html>
