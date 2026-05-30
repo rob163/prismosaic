@@ -64,5 +64,5 @@ export const CONTROL_CONFIG = {
   tileScale: { min: 70, max: 180, step: 1, valueScale: 100 },
   sourceJitter: { min: 0, max: 100, step: 1, valueScale: 100 },
   colorStrength: { min: 0, max: 80, step: 1, valueScale: 100 },
-  loopDuration: { min: 2, max: 12, step: 1 },
+  loopDuration: { min: 1, max: 10, step: 1 },
 };
