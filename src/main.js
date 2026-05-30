@@ -1,6 +1,6 @@
 import { normalizeImages, loadImageFile, createDemoImage } from "./image-fit.js";
 import { MosaicEngine } from "./mosaic-engine.js";
-import { downloadBlob, downloadCanvasPng, recordCanvasWebm } from "./media-export.js";
+import { downloadBlob, downloadCanvasPng, recordCanvasWebm, timestampedFilename } from "./media-export.js";
 import {
   APP_VERSION,
   COLOR_PRESETS,
@@ -131,7 +131,7 @@ function bindEvents() {
   elements.zoom.addEventListener("input", updateSourceSettings);
   elements.offsetX.addEventListener("input", updateSourceSettings);
   elements.offsetY.addEventListener("input", updateSourceSettings);
-  elements.loopDuration.addEventListener("input", updateLabels);
+  elements.loopDuration.addEventListener("input", updateDurationSetting);
   elements.reroll.addEventListener("click", () => engine.renderStill());
   elements.toggle.addEventListener("click", togglePlayback);
   elements.downloadPng.addEventListener("click", () => downloadCanvasPng(elements.canvas));
@@ -277,6 +277,11 @@ function updateLabels() {
   elements.durationValue.value = `${state.settings.loopDuration}s`;
 }
 
+function updateDurationSetting() {
+  readSettings();
+  updateLabels();
+}
+
 function togglePlayback() {
   state.running = !state.running;
   elements.toggle.textContent = state.running ? "Pause" : "Play";
@@ -302,7 +307,7 @@ async function downloadWebm() {
         elements.status.textContent = message;
       },
     });
-    downloadBlob(blob, "prismosaic-loop.webm");
+    downloadBlob(blob, timestampedFilename("prismosaic-loop", "webm"));
     elements.status.textContent = "WebM loop exported";
   } catch (error) {
     elements.status.textContent = error.message;

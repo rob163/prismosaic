@@ -1,4 +1,4 @@
-export function downloadCanvasPng(canvas, filename = "prismosaic.png") {
+export function downloadCanvasPng(canvas, filename = timestampedFilename("prismosaic", "png")) {
   canvas.toBlob((blob) => {
     if (!blob) return;
     downloadBlob(blob, filename);
@@ -13,7 +13,11 @@ export async function recordCanvasWebm(canvas, options) {
 
   const stream = canvas.captureStream(fps);
   const mimeType = pickMimeType();
-  const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+  const recorderOptions = {
+    videoBitsPerSecond: getVideoBitrate(canvas, fps),
+    ...(mimeType ? { mimeType } : {}),
+  };
+  const recorder = new MediaRecorder(stream, recorderOptions);
   const chunks = [];
   const frameInterval = 1000 / fps;
   const totalFrames = Math.max(1, Math.round(duration * fps));
@@ -52,6 +56,19 @@ export function downloadBlob(blob, filename) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+export function timestampedFilename(baseName, extension, date = new Date()) {
+  const timestamp = [
+    date.getFullYear(),
+    pad(date.getMonth() + 1),
+    pad(date.getDate()),
+    "-",
+    pad(date.getHours()),
+    pad(date.getMinutes()),
+    pad(date.getSeconds()),
+  ].join("");
+  return `${baseName}-${timestamp}.${extension}`;
+}
+
 function pickMimeType() {
   const candidates = [
     "video/webm;codecs=vp9",
@@ -61,7 +78,15 @@ function pickMimeType() {
   return candidates.find((type) => MediaRecorder.isTypeSupported(type)) || "";
 }
 
+function getVideoBitrate(canvas, fps) {
+  const megapixels = (canvas.width * canvas.height) / 1_000_000;
+  return Math.round(Math.max(8_000_000, megapixels * fps * 250_000));
+}
+
+function pad(value) {
+  return String(value).padStart(2, "0");
+}
+
 function sleep(ms) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
-
