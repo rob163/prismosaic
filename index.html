@@ -4,12 +4,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Prismosaic</title>
-    <link rel="stylesheet" href="styles/app.css?v=20260512-3" />
+    <link rel="stylesheet" href="styles/app.css?v=20260530-3" />
   </head>
   <body>
     <main class="app-shell">
       <section class="stage" aria-label="Prismosaic preview">
-        <canvas id="mosaic" width="1080" height="1080"></canvas>
+        <div class="canvas-shell">
+          <canvas id="mosaic" width="1080" height="1080"></canvas>
+        </div>
       </section>
 
       <aside class="panel" aria-label="Prismosaic controls">
@@ -181,6 +183,6 @@
       </aside>
     </main>
 
-    <script type="module" src="src/main.js?v=20260512-3"></script>
+    <script type="module" src="src/main.js?v=20260530-3"></script>
   </body>
 </html>

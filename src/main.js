@@ -1,16 +1,18 @@
-import { normalizeImages, loadImageFile, createDemoImage } from "./image-fit.js";
-import { MosaicEngine } from "./mosaic-engine.js";
-import { downloadBlob, downloadCanvasPng, recordCanvasWebm, timestampedFilename } from "./media-export.js";
+import { normalizeImages, loadImageFile, createDemoImage } from "./image-fit.js?v=20260530-3";
+import { MosaicEngine } from "./mosaic-engine.js?v=20260530-3";
+import { downloadBlob, downloadCanvasPng, recordCanvasWebm, timestampedFilename } from "./media-export.js?v=20260530-3";
 import {
   APP_VERSION,
   COLOR_PRESETS,
   CONTROL_CONFIG,
   DEFAULT_SETTINGS,
   OUTPUT_PRESETS,
-} from "./config.js";
+} from "./config.js?v=20260530-3";
 
 const elements = {
   canvas: document.querySelector("#mosaic"),
+  canvasShell: document.querySelector(".canvas-shell"),
+  stage: document.querySelector(".stage"),
   fileInput: document.querySelector("#fileInput"),
   uploadLabel: document.querySelector("#uploadLabel"),
   status: document.querySelector("#status"),
@@ -73,9 +75,52 @@ async function initialize() {
   applyControlConfig();
   populateSelects();
   bindEvents();
+  observeStageResize();
+  window.addEventListener("resize", handleViewportResize);
   state.images = [createDemoImage(1200, 1200)];
   await rebuild();
   engine.start();
+}
+
+function observeStageResize() {
+  if (!elements.stage || typeof ResizeObserver !== "function") return;
+
+  const observer = new ResizeObserver(() => {
+    handleViewportResize();
+  });
+  observer.observe(elements.stage);
+}
+
+function handleViewportResize() {
+  const output = OUTPUT_PRESETS[state.settings.outputPreset];
+  updateCanvasDisplaySize(output.width, output.height);
+}
+
+function updateCanvasDisplaySize(outputWidth, outputHeight) {
+  const { canvas, canvasShell, stage } = elements;
+  if (!canvas || !canvasShell || !outputWidth || !outputHeight) return;
+
+  const ratio = outputWidth / outputHeight;
+  const maxHeight = Math.max(1, window.innerHeight - 36);
+  const maxWidth = Math.max(1, stage?.clientWidth || canvasShell.parentElement?.clientWidth || maxHeight * ratio);
+
+  let displayWidth = Math.min(maxWidth, maxHeight * ratio);
+  let displayHeight = displayWidth / ratio;
+
+  if (displayHeight > maxHeight) {
+    displayHeight = maxHeight;
+    displayWidth = displayHeight * ratio;
+  }
+
+  displayWidth = Math.round(displayWidth);
+  displayHeight = Math.max(1, Math.round(displayWidth / ratio));
+  const scale = displayWidth / outputWidth;
+
+  canvasShell.style.width = `${displayWidth}px`;
+  canvasShell.style.height = `${displayHeight}px`;
+  canvas.style.width = `${outputWidth}px`;
+  canvas.style.height = `${outputHeight}px`;
+  canvas.style.transform = `scale(${scale})`;
 }
 
 function applyControlConfig() {
@@ -181,6 +226,7 @@ async function rebuild() {
 
   engine.stop();
   engine.setSize(output.width, output.height);
+  updateCanvasDisplaySize(output.width, output.height);
   engine.setSources(sources);
   updateChannelSourceOptions();
   applyEngineSettings();
