@@ -227,14 +227,18 @@ const MESSAGES = {
 };
 
 export function getInitialLocale() {
-  const stored = window.localStorage?.getItem(STORAGE_KEY);
+  const stored = readStoredLocale();
   if (isSupportedLocale(stored)) return stored;
   return window.navigator.language?.toLowerCase().startsWith("zh") ? "zh" : "en";
 }
 
 export function persistLocale(locale) {
   if (!isSupportedLocale(locale)) return;
-  window.localStorage?.setItem(STORAGE_KEY, locale);
+  try {
+    window.localStorage?.setItem(STORAGE_KEY, locale);
+  } catch {
+    // Storage may be blocked for opaque origins, private contexts, or embedded previews.
+  }
 }
 
 export function isSupportedLocale(locale) {
@@ -249,4 +253,12 @@ export function translate(locale, key, params = {}) {
 
 function getPath(source, key) {
   return key.split(".").reduce((current, part) => current?.[part], source);
+}
+
+function readStoredLocale() {
+  try {
+    return window.localStorage?.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
 }

@@ -81,7 +81,7 @@ async function initialize() {
   document.documentElement.dataset.appVersion = APP_VERSION;
   applyLocale();
   applyControlConfig();
-  populateSelects();
+  populateSelects({ applyPreset: true });
   bindEvents();
   observeStageResize();
   window.addEventListener("resize", handleViewportResize);
@@ -182,7 +182,7 @@ function applyControlConfig() {
   }
 }
 
-function populateSelects() {
+function populateSelects({ applyPreset = false } = {}) {
   const selectedLanguage = state.locale;
   elements.language.replaceChildren(
     ...SUPPORTED_LOCALES.map((locale) => new Option(t(`options.language.${locale}`), locale)),
@@ -216,7 +216,7 @@ function populateSelects() {
     elements.colorPreset.add(new Option(t(`options.colors.${key}`) || preset.label, key));
   }
   elements.colorPreset.value = selectedColor;
-  applyColorPreset(state.settings.colorPreset);
+  if (applyPreset) applyColorPreset(state.settings.colorPreset);
 }
 
 function bindEvents() {
