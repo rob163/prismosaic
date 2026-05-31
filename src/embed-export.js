@@ -211,15 +211,22 @@ export function mountPrismosaicLoop(
     return createNoopHandle();
   }
 
-  if (typeof window === "undefined" || typeof Image === "undefined") {
-    console.warn("Prismosaic loop requires a browser-like environment with window and Image.");
+  if (typeof window === "undefined" || typeof document === "undefined" || typeof Image === "undefined") {
+    console.warn("Prismosaic loop requires a browser-like environment with window, document, and Image.");
     return createNoopHandle();
   }
 
   const activeRecipe = options.assetBasePath ? { ...recipe, assetBasePath: options.assetBasePath } : recipe;
+  const frameCanvas = document.createElement("canvas");
+  const frameCtx = getCanvasContext(frameCanvas);
+  if (!frameCtx) {
+    return createNoopHandle();
+  }
 
   canvas.width = activeRecipe.width;
   canvas.height = activeRecipe.height;
+  frameCanvas.width = activeRecipe.width;
+  frameCanvas.height = activeRecipe.height;
 
   let sources: LoadedSource[] = [];
   let sourceMap: number[][] = [];
@@ -265,12 +272,12 @@ export function mountPrismosaicLoop(
         drawTile(col, row);
       }
     }
-    drawWatermark();
+    presentFrame();
   }
 
   function clear() {
-    ctx.fillStyle = "#050607";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    frameCtx.fillStyle = "#050607";
+    frameCtx.fillRect(0, 0, frameCanvas.width, frameCanvas.height);
   }
 
   function randomizeSourceMap() {
@@ -298,7 +305,7 @@ export function mountPrismosaicLoop(
     for (const { row, col } of updates) {
       drawTile(col, row);
     }
-    drawWatermark();
+    presentFrame();
   }
 
   function drawTile(col: number, row: number) {
@@ -337,11 +344,11 @@ export function mountPrismosaicLoop(
     const source = sources[channel.sourceIndex];
 
     if (tileScale <= 1) {
-      ctx.fillStyle = "#050607";
-      ctx.fillRect(x0, y0, cellWidth, cellHeight);
+      frameCtx.fillStyle = "#050607";
+      frameCtx.fillRect(x0, y0, cellWidth, cellHeight);
     }
 
-    ctx.drawImage(source, sx, sy, tileWidth, tileHeight, dx, dy, tileWidth, tileHeight);
+    frameCtx.drawImage(source, sx, sy, tileWidth, tileHeight, dx, dy, tileWidth, tileHeight);
     paintTint(dx, dy, tileWidth, tileHeight, channel.color);
     if (tileScale < 1) {
       paintTileLines(dx, dy, tileWidth, tileHeight);
@@ -349,18 +356,23 @@ export function mountPrismosaicLoop(
   }
 
   function paintTint(x: number, y: number, width: number, height: number, hex: string) {
-    ctx.save();
-    ctx.globalCompositeOperation = activeRecipe.settings.blendMode;
-    ctx.globalAlpha = activeRecipe.settings.colorStrength;
-    ctx.fillStyle = hex;
-    ctx.fillRect(x, y, width, height);
-    ctx.restore();
+    frameCtx.save();
+    frameCtx.globalCompositeOperation = activeRecipe.settings.blendMode;
+    frameCtx.globalAlpha = activeRecipe.settings.colorStrength;
+    frameCtx.fillStyle = hex;
+    frameCtx.fillRect(x, y, width, height);
+    frameCtx.restore();
   }
 
   function paintTileLines(x: number, y: number, width: number, height: number) {
-    ctx.fillStyle = "rgba(0,0,0,0.34)";
-    ctx.fillRect(x, y, width, 1);
-    ctx.fillRect(x, y, 1, height);
+    frameCtx.fillStyle = "rgba(0,0,0,0.34)";
+    frameCtx.fillRect(x, y, width, 1);
+    frameCtx.fillRect(x, y, 1, height);
+  }
+
+  function presentFrame() {
+    ctx.drawImage(frameCanvas, 0, 0);
+    drawWatermark();
   }
 
   function drawWatermark() {
