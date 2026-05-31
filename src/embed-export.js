@@ -275,7 +275,7 @@ export function mountPrismosaicLoop(
       const col = randomInt(0, cols - 1);
       const row = randomInt(0, rows - 1);
       if (!sourceMap[row]) sourceMap[row] = [];
-      sourceMap[row][col] = pickChannelIndex(activeChannels);
+      sourceMap[row][col] = pickNextChannelIndex(activeChannels, sourceMap[row][col]);
       drawTile(col, row);
     }
   }
@@ -397,6 +397,21 @@ function getActiveChannels(recipe: PrismosaicRecipe, sources: LoadedSource[]) {
 
 function pickChannelIndex(activeChannels: Array<{ color: string; sourceIndex: number }>) {
   return randomInt(0, Math.max(0, activeChannels.length - 1));
+}
+
+function pickNextChannelIndex(
+  activeChannels: Array<{ color: string; sourceIndex: number }>,
+  previousIndex?: number,
+) {
+  if (activeChannels.length <= 1) return 0;
+  const normalizedPrevious =
+    Number.isInteger(previousIndex) && previousIndex >= 0 && previousIndex < activeChannels.length
+      ? previousIndex
+      : -1;
+  if (normalizedPrevious === -1) return pickChannelIndex(activeChannels);
+
+  const nextIndex = randomInt(0, activeChannels.length - 2);
+  return nextIndex >= normalizedPrevious ? nextIndex + 1 : nextIndex;
 }
 
 function getGridDimensions(recipe: PrismosaicRecipe) {
