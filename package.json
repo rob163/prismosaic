@@ -5,6 +5,6 @@
   "type": "module",
   "scripts": {
     "start": "python3 -m http.server 8080",
-    "check": "node --check src/main.js && node --check src/embed-export.js && node --check src/image-fit.js && node --check src/mosaic-engine.js && node --check src/media-export.js && node --check src/config.js"
+    "check": "node --check src/main.js && node --check src/embed-export.js && node --check src/i18n.js && node --check src/image-fit.js && node --check src/mosaic-engine.js && node --check src/media-export.js && node --check src/config.js"
   }
 }

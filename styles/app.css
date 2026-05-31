@@ -79,12 +79,23 @@ body {
   letter-spacing: 0;
 }
 
+.brand {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 108px;
+  gap: 12px;
+  align-items: start;
+}
+
 .brand p {
   margin: 6px 0 0;
   min-height: 18px;
   color: var(--muted);
   font-size: 12px;
   line-height: 1.4;
+}
+
+.language-control {
+  align-self: start;
 }
 
 .control-group {

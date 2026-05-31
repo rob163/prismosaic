@@ -1,14 +1,15 @@
-import { normalizeImages, loadImageFile, createDemoImage } from "./image-fit.js?v=20260530-4";
-import { MosaicEngine } from "./mosaic-engine.js?v=20260530-4";
-import { exportNextEmbedZip } from "./embed-export.js?v=20260530-4";
-import { downloadBlob, downloadCanvasPng, recordCanvasWebm, timestampedFilename } from "./media-export.js?v=20260530-4";
+import { normalizeImages, loadImageFile, createDemoImage } from "./image-fit.js?v=20260530-5";
+import { translate, getInitialLocale, isSupportedLocale, persistLocale, SUPPORTED_LOCALES } from "./i18n.js?v=20260530-5";
+import { MosaicEngine } from "./mosaic-engine.js?v=20260530-5";
+import { exportNextEmbedZip } from "./embed-export.js?v=20260530-5";
+import { downloadBlob, downloadCanvasPng, recordCanvasWebm, timestampedFilename } from "./media-export.js?v=20260530-5";
 import {
   APP_VERSION,
   COLOR_PRESETS,
   CONTROL_CONFIG,
   DEFAULT_SETTINGS,
   OUTPUT_PRESETS,
-} from "./config.js?v=20260530-4";
+} from "./config.js?v=20260530-5";
 
 const elements = {
   canvas: document.querySelector("#mosaic"),
@@ -17,6 +18,7 @@ const elements = {
   fileInput: document.querySelector("#fileInput"),
   uploadLabel: document.querySelector("#uploadLabel"),
   status: document.querySelector("#status"),
+  language: document.querySelector("#language"),
   outputPreset: document.querySelector("#outputPreset"),
   fitMode: document.querySelector("#fitMode"),
   backgroundMode: document.querySelector("#backgroundMode"),
@@ -61,6 +63,9 @@ const elements = {
 const state = {
   settings: { ...DEFAULT_SETTINGS },
   images: [],
+  locale: getInitialLocale(),
+  uploadSelected: false,
+  status: { key: "status.preparingCanvas", params: {} },
   running: true,
   recording: false,
 };
@@ -74,14 +79,53 @@ initialize().catch((error) => {
 
 async function initialize() {
   document.documentElement.dataset.appVersion = APP_VERSION;
+  applyLocale();
   applyControlConfig();
-  populateSelects();
+  populateSelects({ applyPreset: true });
   bindEvents();
   observeStageResize();
   window.addEventListener("resize", handleViewportResize);
   state.images = [createDemoImage(1200, 1200)];
   await rebuild();
   engine.start();
+}
+
+function t(key, params) {
+  return translate(state.locale, key, params);
+}
+
+function setStatus(key, params = {}) {
+  state.status = { key, params };
+  elements.status.textContent = t(key, params);
+}
+
+function applyLocale({ persist = false } = {}) {
+  if (persist) persistLocale(state.locale);
+  document.documentElement.lang = state.locale === "zh" ? "zh-CN" : "en";
+
+  document.querySelectorAll("[data-i18n]").forEach((element) => {
+    if (element === elements.status) return;
+    element.textContent = t(element.dataset.i18n);
+  });
+  document.querySelectorAll("[data-i18n-title]").forEach((element) => {
+    element.title = t(element.dataset.i18nTitle);
+  });
+  document.querySelectorAll("[data-i18n-aria-label]").forEach((element) => {
+    element.setAttribute("aria-label", t(element.dataset.i18nAriaLabel));
+  });
+
+  updateStatusText();
+  updateUploadLabel();
+}
+
+function updateStatusText() {
+  elements.status.textContent = t(state.status.key, state.status.params);
+}
+
+function updateUploadLabel() {
+  elements.uploadLabel.textContent = state.uploadSelected
+    ? t("status.imagesSelected", { count: state.images.length })
+    : t("upload");
 }
 
 function observeStageResize() {
@@ -138,23 +182,54 @@ function applyControlConfig() {
   }
 }
 
-function populateSelects() {
+function populateSelects({ applyPreset = false } = {}) {
+  const selectedLanguage = state.locale;
+  elements.language.replaceChildren(
+    ...SUPPORTED_LOCALES.map((locale) => new Option(t(`options.language.${locale}`), locale)),
+  );
+  elements.language.value = selectedLanguage;
+
+  const selectedOutput = elements.outputPreset.value || state.settings.outputPreset;
+  elements.outputPreset.replaceChildren();
   for (const [key, preset] of Object.entries(OUTPUT_PRESETS)) {
-    elements.outputPreset.add(new Option(`${preset.label} (${preset.width}x${preset.height})`, key));
+    elements.outputPreset.add(new Option(`${t(`options.output.${key}`)} (${preset.width}x${preset.height})`, key));
   }
+  elements.outputPreset.value = selectedOutput;
 
+  const selectedFit = elements.fitMode.value || state.settings.fitMode;
+  elements.fitMode.replaceChildren(
+    new Option(t("options.fit.cover"), "cover"),
+    new Option(t("options.fit.contain"), "contain"),
+  );
+  elements.fitMode.value = selectedFit;
+
+  const selectedBackground = elements.backgroundMode.value || state.settings.backgroundMode;
+  elements.backgroundMode.replaceChildren(
+    new Option(t("options.background.blur"), "blur"),
+    new Option(t("options.background.solid"), "solid"),
+  );
+  elements.backgroundMode.value = selectedBackground;
+
+  const selectedColor = elements.colorPreset.value || state.settings.colorPreset;
+  elements.colorPreset.replaceChildren();
   for (const [key, preset] of Object.entries(COLOR_PRESETS)) {
-    elements.colorPreset.add(new Option(preset.label, key));
+    elements.colorPreset.add(new Option(t(`options.colors.${key}`) || preset.label, key));
   }
-
-  elements.outputPreset.value = state.settings.outputPreset;
-  elements.fitMode.value = state.settings.fitMode;
-  elements.backgroundMode.value = state.settings.backgroundMode;
-  elements.colorPreset.value = state.settings.colorPreset;
-  applyColorPreset(state.settings.colorPreset);
+  elements.colorPreset.value = selectedColor;
+  if (applyPreset) applyColorPreset(state.settings.colorPreset);
 }
 
 function bindEvents() {
+  elements.language.addEventListener("change", () => {
+    const locale = elements.language.value;
+    if (!isSupportedLocale(locale)) return;
+    state.locale = locale;
+    applyLocale({ persist: true });
+    populateSelects();
+    updateChannelSourceOptions();
+    updateLabels();
+    updateToggleLabel();
+  });
   elements.fileInput.addEventListener("change", handleFiles);
   elements.outputPreset.addEventListener("change", updateSourceSettings);
   elements.fitMode.addEventListener("change", updateSourceSettings);
@@ -190,10 +265,11 @@ async function handleFiles(event) {
   const files = [...event.target.files].slice(0, 3);
   if (!files.length) return;
 
-  elements.status.textContent = "Loading images...";
+  setStatus("status.loadingImages");
   try {
     state.images = await Promise.all(files.map(loadImageFile));
-    elements.uploadLabel.textContent = `${state.images.length} image${state.images.length === 1 ? "" : "s"} selected`;
+    state.uploadSelected = true;
+    updateUploadLabel();
     updateChannelSourceOptions({ resetMapping: true });
     await rebuild();
   } catch (error) {
@@ -236,7 +312,7 @@ async function rebuild() {
   updateLabels();
   engine.renderStill();
   if (state.running) engine.start();
-  elements.status.textContent = `${output.width}x${output.height}, ${state.images.length} source image${state.images.length === 1 ? "" : "s"}`;
+  setStatus("status.ready", { width: output.width, height: output.height, count: state.images.length });
 }
 
 function readSettings() {
@@ -296,10 +372,10 @@ function getChannelSettings() {
 function updateChannelSourceOptions({ resetMapping = false } = {}) {
   elements.channelSources.forEach((select, channelIndex) => {
     const previousValue = select.value || String(state.settings.channelSources[channelIndex] ?? 0);
-    select.replaceChildren(new Option("Off", "off"));
+    select.replaceChildren(new Option(t("options.channels.off"), "off"));
 
     state.images.forEach((image, imageIndex) => {
-      select.add(new Option(`Image ${imageIndex + 1}`, String(imageIndex)));
+      select.add(new Option(t("options.channels.source", { index: imageIndex + 1 }), String(imageIndex)));
     });
 
     if (resetMapping) {
@@ -314,16 +390,20 @@ function updateChannelSourceOptions({ resetMapping = false } = {}) {
 
 function updateLabels() {
   const grid = engine.getGridDimensions();
-  elements.gridValue.value = `${state.settings.gridSize} long side (${grid.cols}x${grid.rows})`;
+  elements.gridValue.value = t("values.grid", {
+    gridSize: state.settings.gridSize,
+    cols: grid.cols,
+    rows: grid.rows,
+  });
   elements.tilesValue.value = state.settings.tilesPerFrame;
-  elements.intervalValue.value = `${state.settings.frameInterval} ms`;
+  elements.intervalValue.value = t("values.milliseconds", { value: state.settings.frameInterval });
   elements.scaleValue.value = `${state.settings.tileScale.toFixed(2)}x`;
   elements.jitterValue.value = `${Math.round(state.settings.sourceJitter * 100)}%`;
   elements.colorValue.value = `${Math.round(state.settings.colorStrength * 100)}%`;
   elements.zoomValue.value = `${state.settings.zoom.toFixed(2)}x`;
   elements.offsetXValue.value = `${Math.round(state.settings.offsetX * 100)}%`;
   elements.offsetYValue.value = `${Math.round(state.settings.offsetY * 100)}%`;
-  elements.durationValue.value = `${state.settings.loopDuration}s`;
+  elements.durationValue.value = t("values.seconds", { value: state.settings.loopDuration });
 }
 
 function updateDurationSetting() {
@@ -333,9 +413,13 @@ function updateDurationSetting() {
 
 function togglePlayback() {
   state.running = !state.running;
-  elements.toggle.textContent = state.running ? "Pause" : "Play";
+  updateToggleLabel();
   if (state.running) engine.start();
   else engine.stop();
+}
+
+function updateToggleLabel() {
+  elements.toggle.textContent = state.running ? t("buttons.pause") : t("buttons.play");
 }
 
 async function downloadWebm() {
@@ -353,11 +437,12 @@ async function downloadWebm() {
       fps: state.settings.fps,
       onFrame: () => engine.tick(),
       onStatus: (message) => {
-        elements.status.textContent = message;
+        const match = message.match(/\d+/);
+        setStatus("status.recording", { percent: match ? Number(match[0]) : 0 });
       },
     });
     downloadBlob(blob, timestampedFilename("prismosaic-loop", "webm"));
-    elements.status.textContent = "WebM loop exported";
+    setStatus("status.webmExported");
   } catch (error) {
     elements.status.textContent = error.message;
   } finally {
@@ -374,7 +459,7 @@ async function downloadEmbedZip() {
   readSettings();
   state.recording = true;
   elements.downloadEmbed.disabled = true;
-  elements.status.textContent = "Preparing embed ZIP...";
+  setStatus("status.preparingEmbed");
 
   try {
     const output = OUTPUT_PRESETS[state.settings.outputPreset];
@@ -397,7 +482,7 @@ async function downloadEmbedZip() {
         },
       },
     });
-    elements.status.textContent = "Embed ZIP exported";
+    setStatus("status.embedExported");
   } catch (error) {
     elements.status.textContent = error.message;
   } finally {
