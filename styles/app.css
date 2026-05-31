@@ -171,6 +171,40 @@ output {
   font-variant-numeric: tabular-nums;
 }
 
+.value-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.numeric-input {
+  width: 68px;
+  min-height: 28px;
+  padding: 4px 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.numeric-input:hover,
+.numeric-input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.value-unit,
+.value-detail {
+  color: var(--muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 input[type="range"] {
   width: 100%;
   accent-color: var(--accent);

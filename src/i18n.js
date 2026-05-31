@@ -116,7 +116,12 @@ const MESSAGES = {
       webmExported: "WebM loop exported",
     },
     upload: "Upload 1-3 images",
+    units: {
+      milliseconds: "ms",
+      seconds: "s",
+    },
     values: {
+      gridDetail: ({ cols, rows }) => `(${cols}×${rows})`,
       grid: ({ gridSize, cols, rows }) => `${gridSize} long side (${cols}x${rows})`,
       milliseconds: ({ value }) => `${value} ms`,
       seconds: ({ value }) => `${value}s`,
@@ -228,7 +233,12 @@ const MESSAGES = {
       webmExported: "WebM 循环已导出",
     },
     upload: "上传 1-3 张图像",
+    units: {
+      milliseconds: "毫秒",
+      seconds: "秒",
+    },
     values: {
+      gridDetail: ({ cols, rows }) => `（${cols}×${rows}）`,
       grid: ({ gridSize, cols, rows }) => `长边 ${gridSize} 格（${cols}x${rows}）`,
       milliseconds: ({ value }) => `${value} 毫秒`,
       seconds: ({ value }) => `${value} 秒`,
