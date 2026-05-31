@@ -1,3 +1,10 @@
+import {
+  assignRandomTileUpdates,
+  fillSourceMap,
+  pickChannelIndex,
+  resetProtectionMap,
+} from "./channel-scheduler.js?v=20260531-1";
+
 export class MosaicEngine {
   constructor(canvas) {
     this.canvas = canvas;
@@ -5,7 +12,9 @@ export class MosaicEngine {
     this.sources = [];
     this.settings = {};
     this.sourceMap = [];
+    this.protectionMap = [];
     this.timer = 0;
+    this.tickCount = 0;
   }
 
   configure(settings) {
@@ -55,26 +64,28 @@ export class MosaicEngine {
   }
 
   randomizeSourceMap() {
-    this.sourceMap = [];
     const activeChannels = this.getActiveChannels();
     const { cols, rows } = this.getGridDimensions();
-    for (let row = 0; row < rows; row += 1) {
-      this.sourceMap[row] = [];
-      for (let col = 0; col < cols; col += 1) {
-        this.sourceMap[row][col] = this.pickChannelIndex(activeChannels);
-      }
-    }
+    fillSourceMap(this.sourceMap, rows, cols, activeChannels.length);
+    resetProtectionMap(this.protectionMap, rows, cols);
+    this.tickCount = 0;
   }
 
   drawRandomTiles(count) {
     if (!this.sources.length) return;
     const activeChannels = this.getActiveChannels();
     const { cols, rows } = this.getGridDimensions();
-    for (let index = 0; index < count; index += 1) {
-      const col = randomInt(0, cols - 1);
-      const row = randomInt(0, rows - 1);
-      if (!this.sourceMap[row]) this.sourceMap[row] = [];
-      this.sourceMap[row][col] = this.pickNextChannelIndex(activeChannels, this.sourceMap[row][col]);
+    this.tickCount += 1;
+    const updates = assignRandomTileUpdates({
+      sourceMap: this.sourceMap,
+      protectionMap: this.protectionMap,
+      rows,
+      cols,
+      activeChannelCount: activeChannels.length,
+      currentTick: this.tickCount,
+      count,
+    });
+    for (const { row, col } of updates) {
       this.drawTile(col, row);
     }
   }
@@ -155,19 +166,7 @@ export class MosaicEngine {
   }
 
   pickChannelIndex(activeChannels = this.getActiveChannels()) {
-    return randomInt(0, Math.max(0, activeChannels.length - 1));
-  }
-
-  pickNextChannelIndex(activeChannels = this.getActiveChannels(), previousIndex) {
-    if (activeChannels.length <= 1) return 0;
-    const normalizedPrevious =
-      Number.isInteger(previousIndex) && previousIndex >= 0 && previousIndex < activeChannels.length
-        ? previousIndex
-        : -1;
-    if (normalizedPrevious === -1) return this.pickChannelIndex(activeChannels);
-
-    const nextIndex = randomInt(0, activeChannels.length - 2);
-    return nextIndex >= normalizedPrevious ? nextIndex + 1 : nextIndex;
+    return pickChannelIndex(activeChannels.length);
   }
 
   getGridDimensions() {

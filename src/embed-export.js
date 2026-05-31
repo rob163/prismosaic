@@ -1,4 +1,5 @@
 import { downloadBlob, timestampedFilename } from "./media-export.js?v=20260530-5";
+import { createChannelSchedulerRuntimeSource } from "./channel-scheduler.js?v=20260531-1";
 
 const ASSET_BASE_PATH = "/prismosaic";
 
@@ -172,6 +173,8 @@ export function PrismosaicLoop({
 function createRuntimeSource() {
   return `${createRecipeTypeSource()}
 
+${createChannelSchedulerRuntimeSource()}
+
 type PrismosaicLoopOptions = {
   assetBasePath?: string;
   paused?: boolean;
@@ -208,7 +211,9 @@ export function mountPrismosaicLoop(
 
   let sources: LoadedSource[] = [];
   let sourceMap: number[][] = [];
+  let protectionMap: number[][] = [];
   let timer = 0;
+  let tickCount = 0;
   let destroyed = false;
 
   loadRecipeSources(activeRecipe)
@@ -256,26 +261,28 @@ export function mountPrismosaicLoop(
   }
 
   function randomizeSourceMap() {
-    sourceMap = [];
     const activeChannels = getActiveChannels(activeRecipe, sources);
     const { cols, rows } = getGridDimensions(activeRecipe);
-    for (let row = 0; row < rows; row += 1) {
-      sourceMap[row] = [];
-      for (let col = 0; col < cols; col += 1) {
-        sourceMap[row][col] = pickChannelIndex(activeChannels);
-      }
-    }
+    fillSourceMap(sourceMap, rows, cols, activeChannels.length);
+    resetProtectionMap(protectionMap, rows, cols);
+    tickCount = 0;
   }
 
   function drawRandomTiles(count: number) {
     if (!sources.length) return;
     const activeChannels = getActiveChannels(activeRecipe, sources);
     const { cols, rows } = getGridDimensions(activeRecipe);
-    for (let index = 0; index < count; index += 1) {
-      const col = randomInt(0, cols - 1);
-      const row = randomInt(0, rows - 1);
-      if (!sourceMap[row]) sourceMap[row] = [];
-      sourceMap[row][col] = pickNextChannelIndex(activeChannels, sourceMap[row][col]);
+    tickCount += 1;
+    const updates = assignRandomTileUpdates({
+      sourceMap,
+      protectionMap,
+      rows,
+      cols,
+      activeChannelCount: activeChannels.length,
+      currentTick: tickCount,
+      count,
+    });
+    for (const { row, col } of updates) {
       drawTile(col, row);
     }
   }
@@ -393,25 +400,6 @@ function getActiveChannels(recipe: PrismosaicRecipe, sources: LoadedSource[]) {
 
   if (active.length > 0) return active;
   return [{ color: "#ffffff", sourceIndex: 0 }];
-}
-
-function pickChannelIndex(activeChannels: Array<{ color: string; sourceIndex: number }>) {
-  return randomInt(0, Math.max(0, activeChannels.length - 1));
-}
-
-function pickNextChannelIndex(
-  activeChannels: Array<{ color: string; sourceIndex: number }>,
-  previousIndex?: number,
-) {
-  if (activeChannels.length <= 1) return 0;
-  const normalizedPrevious =
-    Number.isInteger(previousIndex) && previousIndex >= 0 && previousIndex < activeChannels.length
-      ? previousIndex
-      : -1;
-  if (normalizedPrevious === -1) return pickChannelIndex(activeChannels);
-
-  const nextIndex = randomInt(0, activeChannels.length - 2);
-  return nextIndex >= normalizedPrevious ? nextIndex + 1 : nextIndex;
 }
 
 function getGridDimensions(recipe: PrismosaicRecipe) {
