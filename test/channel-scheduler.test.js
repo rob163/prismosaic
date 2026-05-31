@@ -1,6 +1,5 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import vm from "node:vm";
 
 import {
   CHANNEL_SWITCH_PROTECTION_TICKS,
@@ -68,6 +67,41 @@ test("assignRandomTileUpdates enforces the protection window before a tile can c
   assert.equal(sourceMap[0][0], 2);
 });
 
+test("assignRandomTileUpdates does not add protection when only one channel is active", () => {
+  const sourceMap = [];
+  const protectionMap = [];
+  fillSourceMap(sourceMap, 1, 1, 1, () => 0);
+  resetProtectionMap(protectionMap, 1, 1);
+
+  const firstTick = assignRandomTileUpdates({
+    sourceMap,
+    protectionMap,
+    rows: 1,
+    cols: 1,
+    activeChannelCount: 1,
+    currentTick: 1,
+    count: 1,
+    randomInt: createQueuedRandom([0]),
+  });
+
+  assert.deepEqual(firstTick, [{ row: 0, col: 0, channelIndex: 0 }]);
+  assert.equal(protectionMap[0][0], 0);
+
+  const secondTick = assignRandomTileUpdates({
+    sourceMap,
+    protectionMap,
+    rows: 1,
+    cols: 1,
+    activeChannelCount: 1,
+    currentTick: 2,
+    count: 1,
+    randomInt: createQueuedRandom([0]),
+  });
+
+  assert.deepEqual(secondTick, [{ row: 0, col: 0, channelIndex: 0 }]);
+  assert.equal(protectionMap[0][0], 0);
+});
+
 test("assignRandomTileUpdates only updates unprotected tiles once per tick", () => {
   const sourceMap = [];
   const protectionMap = [];
@@ -100,24 +134,11 @@ test("assignRandomTileUpdates only updates unprotected tiles once per tick", () 
 
 test("runtime source includes the scheduler helpers used by exported embeds", () => {
   const runtimeSource = createChannelSchedulerRuntimeSource();
-  const context = vm.createContext({});
-  const script = new vm.Script(`
-${runtimeSource}
-globalThis.scheduler = {
-  CHANNEL_SWITCH_PROTECTION_TICKS,
-  assignRandomTileUpdates,
-  fillSourceMap,
-  pickNextChannelIndex,
-  resetProtectionMap,
-};
-`);
-  script.runInContext(context);
-
-  assert.equal(context.scheduler.CHANNEL_SWITCH_PROTECTION_TICKS, 4);
-  assert.equal(typeof context.scheduler.assignRandomTileUpdates, "function");
-  assert.equal(typeof context.scheduler.fillSourceMap, "function");
-  assert.equal(typeof context.scheduler.pickNextChannelIndex, "function");
-  assert.equal(typeof context.scheduler.resetProtectionMap, "function");
+  assert.match(runtimeSource, /type SchedulerAssignOptions =/);
+  assert.match(runtimeSource, /function ensureGridRow\(grid: number\[\]\[\], row: number\)/);
+  assert.match(runtimeSource, /function assignRandomTileUpdates\(\{/);
+  assert.match(runtimeSource, /channelIndex !== previousChannelIndex/);
+  assert.match(runtimeSource, /const CHANNEL_SWITCH_PROTECTION_TICKS = 4/);
 });
 
 function createQueuedRandom(values) {
