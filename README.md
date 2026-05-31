@@ -44,19 +44,22 @@ open `/prismosaic/`.
 
 ## Publish on GitHub Pages
 
-Prismosaic is ready to publish as a standalone repository.
+Prismosaic is ready to publish from this repository.
 
-1. Create a new public GitHub repository.
-2. Copy the contents of this `prismosaic/` directory into the repository root.
-3. Push to the `main` branch.
-4. In the repository settings, open **Pages**.
-5. Set **Build and deployment** to **GitHub Actions**.
-6. The included workflow at `.github/workflows/pages.yml` will publish the site.
+One-time repository setup:
+
+1. In the repository settings, open **Pages**.
+2. Set **Build and deployment** to **GitHub Actions**.
+3. Push changes to the `main` branch, or manually run the included workflow at
+   `.github/workflows/pages.yml`.
+
+The workflow checks JavaScript syntax, runs the test suite, packages the runtime
+static files, and deploys them to GitHub Pages.
 
 The live demo URL will be:
 
 ```text
-https://<username>.github.io/<repo-name>/
+https://rob163.github.io/prismosaic/
 ```
 
 This directory also includes `.nojekyll` so GitHub Pages serves the static files
