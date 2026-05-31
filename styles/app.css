@@ -72,6 +72,31 @@ body {
   border-radius: 8px;
 }
 
+.project-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.project-links a {
+  display: inline-grid;
+  min-height: 32px;
+  place-items: center;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--text);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.project-links a:hover {
+  border-color: var(--accent);
+}
+
 .brand h1 {
   margin: 0;
   font-size: 24px;
@@ -242,16 +267,47 @@ button:disabled {
 @media (max-width: 900px) {
   .app-shell {
     grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .stage {
+    min-height: min(58vh, 520px);
   }
 
   .panel {
     align-self: auto;
+    gap: 12px;
   }
 }
 
 @media (max-width: 460px) {
   .app-shell {
+    gap: 10px;
     padding: 10px;
+  }
+
+  .stage {
+    min-height: 260px;
+  }
+
+  .panel {
+    padding: 12px;
+  }
+
+  .brand {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .language-control {
+    width: 100%;
+  }
+
+  .control-group,
+  .project-links {
+    gap: 9px;
+    padding-top: 12px;
   }
 
   .button-grid {
