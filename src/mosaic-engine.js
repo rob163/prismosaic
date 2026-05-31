@@ -74,7 +74,7 @@ export class MosaicEngine {
       const col = randomInt(0, cols - 1);
       const row = randomInt(0, rows - 1);
       if (!this.sourceMap[row]) this.sourceMap[row] = [];
-      this.sourceMap[row][col] = this.pickChannelIndex(activeChannels);
+      this.sourceMap[row][col] = this.pickNextChannelIndex(activeChannels, this.sourceMap[row][col]);
       this.drawTile(col, row);
     }
   }
@@ -156,6 +156,18 @@ export class MosaicEngine {
 
   pickChannelIndex(activeChannels = this.getActiveChannels()) {
     return randomInt(0, Math.max(0, activeChannels.length - 1));
+  }
+
+  pickNextChannelIndex(activeChannels = this.getActiveChannels(), previousIndex) {
+    if (activeChannels.length <= 1) return 0;
+    const normalizedPrevious =
+      Number.isInteger(previousIndex) && previousIndex >= 0 && previousIndex < activeChannels.length
+        ? previousIndex
+        : -1;
+    if (normalizedPrevious === -1) return this.pickChannelIndex(activeChannels);
+
+    const nextIndex = randomInt(0, activeChannels.length - 2);
+    return nextIndex >= normalizedPrevious ? nextIndex + 1 : nextIndex;
   }
 
   getGridDimensions() {
