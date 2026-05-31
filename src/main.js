@@ -1,8 +1,8 @@
 import { normalizeImages, loadImageFile, createDemoImage } from "./image-fit.js?v=20260530-5";
 import { translate, getInitialLocale, isSupportedLocale, persistLocale, SUPPORTED_LOCALES } from "./i18n.js?v=20260530-5";
 import { MosaicEngine } from "./mosaic-engine.js?v=20260530-5";
-import { exportNextEmbedZip } from "./embed-export.js?v=20260530-5";
-import { downloadBlob, downloadCanvasPng, recordCanvasWebm, timestampedFilename } from "./media-export.js?v=20260530-5";
+import { exportNextEmbedZip } from "./embed-export.js?v=20260531-2";
+import { downloadBlob, downloadCanvasPng, recordCanvasWebm, timestampedFilename } from "./media-export.js?v=20260531-2";
 import {
   APP_VERSION,
   COLOR_PRESETS,

@@ -1,5 +1,6 @@
-import { downloadBlob, timestampedFilename } from "./media-export.js?v=20260530-5";
+import { downloadBlob, timestampedFilename } from "./media-export.js?v=20260531-2";
 import { createChannelSchedulerRuntimeSource } from "./channel-scheduler.js?v=20260531-1";
+import { EXPORT_WATERMARK, shouldApplyExportWatermark } from "./watermark.js";
 
 const ASSET_BASE_PATH = "/prismosaic";
 
@@ -26,6 +27,7 @@ export async function exportNextEmbedZip({ appVersion, sources, recipe }) {
     height: recipe.height,
     assetBasePath: ASSET_BASE_PATH,
     assets: assets.map((asset) => asset.filename),
+    watermark: shouldApplyExportWatermark() ? EXPORT_WATERMARK : undefined,
     settings: recipe.settings,
   };
 
@@ -93,12 +95,22 @@ function createRecipeTypeSource() {
   sourceIndex: number;
 };
 
+export type PrismosaicWatermark = {
+  enabled: boolean;
+  text: string;
+  color: string;
+  opacity: number;
+  fontRatio: number;
+  topRatio: number;
+};
+
 export type PrismosaicRecipe = {
   version: string;
   width: number;
   height: number;
   assetBasePath: string;
   assets: string[];
+  watermark?: PrismosaicWatermark;
   settings: {
     gridSize: number;
     tilesPerFrame: number;
@@ -253,6 +265,7 @@ export function mountPrismosaicLoop(
         drawTile(col, row);
       }
     }
+    drawWatermark();
   }
 
   function clear() {
@@ -285,6 +298,7 @@ export function mountPrismosaicLoop(
     for (const { row, col } of updates) {
       drawTile(col, row);
     }
+    drawWatermark();
   }
 
   function drawTile(col: number, row: number) {
@@ -347,6 +361,24 @@ export function mountPrismosaicLoop(
     ctx.fillStyle = "rgba(0,0,0,0.34)";
     ctx.fillRect(x, y, width, 1);
     ctx.fillRect(x, y, 1, height);
+  }
+
+  function drawWatermark() {
+    const watermark = activeRecipe.watermark;
+    if (!watermark?.enabled || !watermark.text) return;
+
+    const shortSide = Math.max(1, Math.min(canvas.width, canvas.height));
+    const fontSize = Math.max(18, Math.round(shortSide * watermark.fontRatio));
+    const y = Math.round(canvas.height * watermark.topRatio);
+
+    ctx.save();
+    ctx.globalAlpha = watermark.opacity;
+    ctx.fillStyle = watermark.color;
+    ctx.font = \`600 \${fontSize}px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif\`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(watermark.text, canvas.width / 2, y);
+    ctx.restore();
   }
 
   return { start, stop, renderStill, destroy };
