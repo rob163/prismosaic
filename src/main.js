@@ -147,7 +147,10 @@ function updateCanvasDisplaySize(outputWidth, outputHeight) {
   if (!canvas || !canvasShell || !outputWidth || !outputHeight) return;
 
   const ratio = outputWidth / outputHeight;
-  const maxHeight = Math.max(1, window.innerHeight - 36);
+  const mobileViewport = window.matchMedia("(max-width: 900px)").matches;
+  const desktopMaxHeight = window.innerHeight - 36;
+  const mobileMaxHeight = Math.min(window.innerHeight * 0.58, 520);
+  const maxHeight = Math.max(1, mobileViewport ? mobileMaxHeight : desktopMaxHeight);
   const maxWidth = Math.max(1, stage?.clientWidth || canvasShell.parentElement?.clientWidth || maxHeight * ratio);
 
   let displayWidth = Math.min(maxWidth, maxHeight * ratio);

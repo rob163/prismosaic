@@ -7,6 +7,7 @@ const MESSAGES = {
     aria: {
       controls: "Prismosaic controls",
       preview: "Prismosaic preview",
+      projectLinks: "Project links",
       tintChannels: "Tint channels",
     },
     buttons: {
@@ -68,6 +69,10 @@ const MESSAGES = {
       tilesPerFrame: "How many random cells are replaced on each animation tick. Higher values produce faster visual change.",
       zoom: "Scales the uploaded image before mosaic sampling. Use this to crop tighter or reveal more of the source photo.",
     },
+    links: {
+      about: "About",
+      github: "GitHub",
+    },
     options: {
       background: {
         blur: "Blur fill",
@@ -121,6 +126,7 @@ const MESSAGES = {
     aria: {
       controls: "Prismosaic 控制面板",
       preview: "Prismosaic 预览",
+      projectLinks: "项目链接",
       tintChannels: "色彩通道",
     },
     buttons: {
@@ -175,6 +181,10 @@ const MESSAGES = {
       tileScale: "色块裁切和绘制的相对大小。大于 1 会覆盖邻近格，小于 1 会露出背景间隙。",
       tilesPerFrame: "每次动画更新替换的随机色块数量。数值越高，视觉变化越快。",
       zoom: "在马赛克取样前缩放上传图像。可用于更紧裁切或展示更多原图。",
+    },
+    links: {
+      about: "关于",
+      github: "GitHub",
     },
     options: {
       background: {
