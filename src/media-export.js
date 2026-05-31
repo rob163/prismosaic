@@ -1,5 +1,12 @@
+import {
+  createWatermarkedCanvas,
+  paintWatermarkedFrame,
+  shouldApplyExportWatermark,
+} from "./watermark.js";
+
 export function downloadCanvasPng(canvas, filename = timestampedFilename("prismosaic", "png")) {
-  canvas.toBlob((blob) => {
+  const exportCanvas = shouldApplyExportWatermark() ? createWatermarkedCanvas(canvas) : canvas;
+  exportCanvas.toBlob((blob) => {
     if (!blob) return;
     downloadBlob(blob, filename);
   }, "image/png");
@@ -11,7 +18,9 @@ export async function recordCanvasWebm(canvas, options) {
     throw new Error("This browser does not support canvas video recording.");
   }
 
-  const stream = canvas.captureStream(fps);
+  const watermark = shouldApplyExportWatermark();
+  const captureCanvas = watermark ? createWatermarkedCanvas(canvas) : canvas;
+  const stream = captureCanvas.captureStream(fps);
   const mimeType = pickMimeType();
   const recorderOptions = {
     videoBitsPerSecond: getVideoBitrate(canvas, fps),
@@ -34,6 +43,7 @@ export async function recordCanvasWebm(canvas, options) {
 
   for (let frame = 0; frame < totalFrames; frame += 1) {
     onFrame(frame, totalFrames);
+    if (watermark) paintWatermarkedFrame(captureCanvas, canvas);
     if (onStatus) onStatus(`Recording ${Math.round(((frame + 1) / totalFrames) * 100)}%`);
     await sleep(frameInterval);
   }
