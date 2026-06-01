@@ -68,6 +68,10 @@ export const VIDEO_EXPORT_PRESETS = {
     extension: "webm",
     mimeType: "video/webm;codecs=vp8",
   },
+  webm: {
+    extension: "webm",
+    mimeType: "video/webm",
+  },
 };
 
 export const CONTROL_CONFIG = {

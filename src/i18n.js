@@ -111,6 +111,7 @@ const MESSAGES = {
       },
       videoFormat: {
         mp4H264: "MP4 (H.264)",
+        webm: "WebM",
         webmVp8: "WebM (VP8)",
         webmVp9: "WebM (VP9)",
       },
@@ -240,6 +241,7 @@ const MESSAGES = {
       },
       videoFormat: {
         mp4H264: "MP4 (H.264)",
+        webm: "WebM",
         webmVp8: "WebM (VP8)",
         webmVp9: "WebM (VP9)",
       },
