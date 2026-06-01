@@ -25,7 +25,7 @@
       name="twitter:description"
       content="Create color-shifted mosaic stills and looping videos locally in your browser."
     />
-    <link rel="stylesheet" href="styles/app.css?v=20260531-1" />
+    <link rel="stylesheet" href="styles/app.css?v=20260601-1" />
   </head>
   <body>
     <main class="app-shell">
@@ -151,10 +151,7 @@
           <label title="Number of mosaic cells on the longer output side. The shorter side is calculated from the output ratio so tiles stay close to square." data-i18n-title="hints.gridSize">
             <span class="row">
               <span><span data-i18n="fields.gridSize">Grid size</span> <span class="hint">?</span></span>
-              <span class="value-field">
-                <input id="gridNumber" type="number" class="numeric-input" />
-                <span id="gridDetail" class="value-detail"></span>
-              </span>
+              <output id="gridValue">28x28</output>
             </span>
             <input id="grid" type="range" />
           </label>
@@ -241,6 +238,6 @@
       </aside>
     </main>
 
-    <script type="module" src="src/main.js?v=20260531-4"></script>
+    <script type="module" src="src/main.js?v=20260601-2"></script>
   </body>
 </html>

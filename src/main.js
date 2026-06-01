@@ -1,5 +1,5 @@
 import { normalizeImages, loadImageFile, createDemoImage } from "./image-fit.js?v=20260530-5";
-import { translate, getInitialLocale, isSupportedLocale, persistLocale, SUPPORTED_LOCALES } from "./i18n.js?v=20260601-1";
+import { translate, getInitialLocale, isSupportedLocale, persistLocale, SUPPORTED_LOCALES } from "./i18n.js?v=20260601-2";
 import { MosaicEngine } from "./mosaic-engine.js?v=20260530-5";
 import { exportNextEmbedZip } from "./embed-export.js?v=20260531-3";
 import { downloadBlob, downloadCanvasPng, recordCanvasWebm, timestampedFilename } from "./media-export.js?v=20260531-2";
@@ -34,8 +34,7 @@ const elements = {
     document.querySelector("#channelSource2"),
   ],
   grid: document.querySelector("#grid"),
-  gridNumber: document.querySelector("#gridNumber"),
-  gridDetail: document.querySelector("#gridDetail"),
+  gridValue: document.querySelector("#gridValue"),
   tilesPerFrame: document.querySelector("#tilesPerFrame"),
   tilesPerFrameNumber: document.querySelector("#tilesPerFrameNumber"),
   frameInterval: document.querySelector("#frameInterval"),
@@ -470,13 +469,15 @@ function updateChannelSourceOptions({ resetMapping = false } = {}) {
 
 function updateLabels() {
   const grid = engine.getGridDimensions();
-  if (elements.gridDetail) {
-    elements.gridDetail.textContent = t("values.gridDetail", {
+  if (elements.gridValue) {
+    elements.gridValue.value = t("values.grid", {
+      gridSize: state.settings.gridSize,
       cols: grid.cols,
       rows: grid.rows,
     });
   }
   for (const id of Object.keys(CONTROL_CONFIG)) {
+    if (!elements[`${id}Number`]) continue;
     syncNumberInputFromRange(id);
   }
 }

@@ -65,8 +65,8 @@ body {
 .panel {
   align-self: start;
   display: grid;
-  gap: 14px;
-  padding: 16px;
+  gap: 10px;
+  padding: 14px;
   background: color-mix(in srgb, var(--panel), transparent 4%);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -76,7 +76,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  padding-top: 14px;
+  padding-top: 10px;
   border-top: 1px solid var(--line);
 }
 
@@ -125,8 +125,8 @@ body {
 
 .control-group {
   display: grid;
-  gap: 10px;
-  padding-top: 14px;
+  gap: 7px;
+  padding-top: 10px;
   border-top: 1px solid var(--line);
 }
 
@@ -140,7 +140,7 @@ body {
 
 label {
   display: grid;
-  gap: 7px;
+  gap: 5px;
   color: var(--muted);
   font-size: 12px;
 }
@@ -174,21 +174,30 @@ output {
 .value-field {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
+  flex-shrink: 0;
 }
 
 .numeric-input {
-  width: 68px;
-  min-height: 28px;
-  padding: 4px 6px;
+  width: 46px;
+  min-height: 0;
+  height: 24px;
+  padding: 2px 4px;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 4px;
   background: var(--panel-2);
   color: var(--text);
   font: inherit;
-  font-size: 12px;
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
   text-align: right;
+  -moz-appearance: textfield;
+}
+
+.numeric-input::-webkit-outer-spin-button,
+.numeric-input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
 }
 
 .numeric-input:hover,
@@ -197,10 +206,9 @@ output {
   outline: none;
 }
 
-.value-unit,
-.value-detail {
+.value-unit {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -238,7 +246,7 @@ input[type="color"] {
 
 .channel-controls {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .channel-row {
