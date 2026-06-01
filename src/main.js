@@ -1,5 +1,5 @@
 import { normalizeImages, loadImageFile, createDemoImage } from "./image-fit.js?v=20260530-5";
-import { translate, getInitialLocale, isSupportedLocale, persistLocale, SUPPORTED_LOCALES } from "./i18n.js?v=20260530-5";
+import { translate, getInitialLocale, isSupportedLocale, persistLocale, SUPPORTED_LOCALES } from "./i18n.js?v=20260601-2";
 import { MosaicEngine } from "./mosaic-engine.js?v=20260530-5";
 import { exportNextEmbedZip } from "./embed-export.js?v=20260531-3";
 import { downloadBlob, downloadCanvasPng, recordCanvasWebm, timestampedFilename } from "./media-export.js?v=20260531-2";
@@ -9,7 +9,7 @@ import {
   CONTROL_CONFIG,
   DEFAULT_SETTINGS,
   OUTPUT_PRESETS,
-} from "./config.js?v=20260530-5";
+} from "./config.js?v=20260601-1";
 
 const elements = {
   canvas: document.querySelector("#mosaic"),
@@ -36,23 +36,23 @@ const elements = {
   grid: document.querySelector("#grid"),
   gridValue: document.querySelector("#gridValue"),
   tilesPerFrame: document.querySelector("#tilesPerFrame"),
-  tilesValue: document.querySelector("#tilesValue"),
+  tilesPerFrameNumber: document.querySelector("#tilesPerFrameNumber"),
   frameInterval: document.querySelector("#frameInterval"),
-  intervalValue: document.querySelector("#intervalValue"),
+  frameIntervalNumber: document.querySelector("#frameIntervalNumber"),
   tileScale: document.querySelector("#tileScale"),
-  scaleValue: document.querySelector("#scaleValue"),
+  tileScaleNumber: document.querySelector("#tileScaleNumber"),
   sourceJitter: document.querySelector("#sourceJitter"),
-  jitterValue: document.querySelector("#jitterValue"),
+  sourceJitterNumber: document.querySelector("#sourceJitterNumber"),
   colorStrength: document.querySelector("#colorStrength"),
-  colorValue: document.querySelector("#colorValue"),
+  colorStrengthNumber: document.querySelector("#colorStrengthNumber"),
   zoom: document.querySelector("#zoom"),
-  zoomValue: document.querySelector("#zoomValue"),
+  zoomNumber: document.querySelector("#zoomNumber"),
   offsetX: document.querySelector("#offsetX"),
-  offsetXValue: document.querySelector("#offsetXValue"),
+  offsetXNumber: document.querySelector("#offsetXNumber"),
   offsetY: document.querySelector("#offsetY"),
-  offsetYValue: document.querySelector("#offsetYValue"),
+  offsetYNumber: document.querySelector("#offsetYNumber"),
   loopDuration: document.querySelector("#loopDuration"),
-  durationValue: document.querySelector("#durationValue"),
+  loopDurationNumber: document.querySelector("#loopDurationNumber"),
   reroll: document.querySelector("#reroll"),
   toggle: document.querySelector("#toggle"),
   downloadPng: document.querySelector("#downloadPng"),
@@ -174,14 +174,99 @@ function updateCanvasDisplaySize(outputWidth, outputHeight) {
 
 function applyControlConfig() {
   for (const [id, config] of Object.entries(CONTROL_CONFIG)) {
-    const input = elements[id];
-    if (!input) continue;
-    input.min = String(config.min);
-    input.max = String(config.max);
-    input.step = String(config.step);
+    const range = elements[id];
+    const number = elements[`${id}Number`];
+    if (range) {
+      range.min = String(config.min);
+      range.max = String(config.max);
+      range.step = String(config.step);
+    }
+    if (number) {
+      if (config.numberStep != null && config.valueScale) {
+        number.min = String(config.min / config.valueScale);
+        number.max = String(config.max / config.valueScale);
+        number.step = String(config.numberStep);
+      } else {
+        number.min = String(config.min);
+        number.max = String(config.max);
+        number.step = String(config.step);
+      }
+    }
     const settingKey = config.valueKey || id;
     const value = state.settings[settingKey];
-    input.value = String(config.valueScale ? Math.round(value * config.valueScale) : value);
+    const raw = config.valueScale ? Math.round(value * config.valueScale) : value;
+    if (range) range.value = String(raw);
+    if (number) number.value = formatControlNumber(id, raw);
+  }
+}
+
+function formatControlNumber(id, raw) {
+  const config = CONTROL_CONFIG[id];
+  if (config.numberStep != null && config.valueScale) {
+    return (raw / config.valueScale).toFixed(config.numberDecimals ?? 2);
+  }
+  return String(raw);
+}
+
+function snapControlRaw(id, value) {
+  const config = CONTROL_CONFIG[id];
+  let raw =
+    config.numberStep != null && config.valueScale ? Math.round(value * config.valueScale) : Math.round(value);
+  const step = config.step || 1;
+  raw = Math.round(raw / step) * step;
+  return Math.min(config.max, Math.max(config.min, raw));
+}
+
+function syncNumberInputFromRange(id) {
+  const range = elements[id];
+  const number = elements[`${id}Number`];
+  if (!range || !number) return;
+  number.value = formatControlNumber(id, Number(range.value));
+}
+
+function applyNumberInputToRange(id) {
+  const config = CONTROL_CONFIG[id];
+  const range = elements[id];
+  const number = elements[`${id}Number`];
+  if (!range || !number) return;
+
+  const parsed = Number(number.value);
+  if (!Number.isFinite(parsed)) {
+    syncNumberInputFromRange(id);
+    return;
+  }
+
+  const raw = snapControlRaw(id, parsed);
+  range.value = String(raw);
+  syncNumberInputFromRange(id);
+}
+
+function getControlChangeHandler(id) {
+  if (id === "zoom" || id === "offsetX" || id === "offsetY") return updateSourceSettings;
+  if (id === "loopDuration") return updateDurationSetting;
+  return updateRenderSettings;
+}
+
+function bindControlInputs() {
+  for (const id of Object.keys(CONTROL_CONFIG)) {
+    const range = elements[id];
+    const number = elements[`${id}Number`];
+    if (!range) continue;
+
+    const handler = getControlChangeHandler(id);
+    range.addEventListener("input", () => {
+      syncNumberInputFromRange(id);
+      handler();
+    });
+
+    if (!number) continue;
+    number.addEventListener("change", () => {
+      applyNumberInputToRange(id);
+      handler();
+    });
+    number.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") number.blur();
+    });
   }
 }
 
@@ -247,16 +332,7 @@ function bindEvents() {
   elements.channelSources.forEach((select) => {
     select.addEventListener("change", updateRenderSettings);
   });
-  elements.grid.addEventListener("input", updateRenderSettings);
-  elements.tilesPerFrame.addEventListener("input", updateRenderSettings);
-  elements.frameInterval.addEventListener("input", updateRenderSettings);
-  elements.tileScale.addEventListener("input", updateRenderSettings);
-  elements.sourceJitter.addEventListener("input", updateRenderSettings);
-  elements.colorStrength.addEventListener("input", updateRenderSettings);
-  elements.zoom.addEventListener("input", updateSourceSettings);
-  elements.offsetX.addEventListener("input", updateSourceSettings);
-  elements.offsetY.addEventListener("input", updateSourceSettings);
-  elements.loopDuration.addEventListener("input", updateDurationSetting);
+  bindControlInputs();
   elements.reroll.addEventListener("click", () => engine.renderStill());
   elements.toggle.addEventListener("click", togglePlayback);
   elements.downloadPng.addEventListener("click", () => downloadCanvasPng(elements.canvas));
@@ -393,20 +469,17 @@ function updateChannelSourceOptions({ resetMapping = false } = {}) {
 
 function updateLabels() {
   const grid = engine.getGridDimensions();
-  elements.gridValue.value = t("values.grid", {
-    gridSize: state.settings.gridSize,
-    cols: grid.cols,
-    rows: grid.rows,
-  });
-  elements.tilesValue.value = state.settings.tilesPerFrame;
-  elements.intervalValue.value = t("values.milliseconds", { value: state.settings.frameInterval });
-  elements.scaleValue.value = `${state.settings.tileScale.toFixed(2)}x`;
-  elements.jitterValue.value = `${Math.round(state.settings.sourceJitter * 100)}%`;
-  elements.colorValue.value = `${Math.round(state.settings.colorStrength * 100)}%`;
-  elements.zoomValue.value = `${state.settings.zoom.toFixed(2)}x`;
-  elements.offsetXValue.value = `${Math.round(state.settings.offsetX * 100)}%`;
-  elements.offsetYValue.value = `${Math.round(state.settings.offsetY * 100)}%`;
-  elements.durationValue.value = t("values.seconds", { value: state.settings.loopDuration });
+  if (elements.gridValue) {
+    elements.gridValue.value = t("values.grid", {
+      gridSize: state.settings.gridSize,
+      cols: grid.cols,
+      rows: grid.rows,
+    });
+  }
+  for (const id of Object.keys(CONTROL_CONFIG)) {
+    if (!elements[`${id}Number`]) continue;
+    syncNumberInputFromRange(id);
+  }
 }
 
 function updateDurationSetting() {

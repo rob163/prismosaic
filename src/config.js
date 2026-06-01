@@ -55,13 +55,13 @@ export const DEFAULT_SETTINGS = {
 };
 
 export const CONTROL_CONFIG = {
-  zoom: { min: 70, max: 180, step: 1, valueScale: 100 },
+  zoom: { min: 70, max: 180, step: 1, valueScale: 100, numberStep: 0.01, numberDecimals: 2 },
   offsetX: { min: -50, max: 50, step: 1, valueScale: 100 },
   offsetY: { min: -50, max: 50, step: 1, valueScale: 100 },
   grid: { min: 8, max: 64, step: 1, valueKey: "gridSize" },
   tilesPerFrame: { min: 1, max: 220, step: 1 },
   frameInterval: { min: 20, max: 500, step: 10 },
-  tileScale: { min: 70, max: 180, step: 1, valueScale: 100 },
+  tileScale: { min: 70, max: 180, step: 1, valueScale: 100, numberStep: 0.01, numberDecimals: 2 },
   sourceJitter: { min: 0, max: 100, step: 1, valueScale: 100 },
   colorStrength: { min: 0, max: 80, step: 1, valueScale: 100 },
   loopDuration: { min: 1, max: 10, step: 1 },
