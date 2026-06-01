@@ -1,5 +1,5 @@
 import { normalizeImages, loadImageFile, createDemoImage } from "./image-fit.js?v=20260530-5";
-import { translate, getInitialLocale, isSupportedLocale, persistLocale, SUPPORTED_LOCALES } from "./i18n.js?v=20260530-5";
+import { translate, getInitialLocale, isSupportedLocale, persistLocale, SUPPORTED_LOCALES } from "./i18n.js?v=20260601-1";
 import { MosaicEngine } from "./mosaic-engine.js?v=20260530-5";
 import { exportNextEmbedZip } from "./embed-export.js?v=20260531-3";
 import { downloadBlob, downloadCanvasPng, recordCanvasWebm, timestampedFilename } from "./media-export.js?v=20260531-2";
@@ -9,7 +9,7 @@ import {
   CONTROL_CONFIG,
   DEFAULT_SETTINGS,
   OUTPUT_PRESETS,
-} from "./config.js?v=20260530-5";
+} from "./config.js?v=20260601-1";
 
 const elements = {
   canvas: document.querySelector("#mosaic"),
