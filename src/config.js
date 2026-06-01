@@ -1,4 +1,4 @@
-export const APP_VERSION = "2026.05.31.1";
+export const APP_VERSION = "2026.06.01.1";
 
 export const OUTPUT_PRESETS = {
   square: { label: "Square", width: 1080, height: 1080 },
@@ -51,7 +51,23 @@ export const DEFAULT_SETTINGS = {
   colorPreset: "neon",
   channelSources: [0, 0, 0],
   loopDuration: 5,
+  videoFormat: "mp4H264",
   fps: 30,
+};
+
+export const VIDEO_EXPORT_PRESETS = {
+  mp4H264: {
+    extension: "mp4",
+    mimeType: "video/mp4;codecs=avc1.42E01E",
+  },
+  webmVp9: {
+    extension: "webm",
+    mimeType: "video/webm;codecs=vp9",
+  },
+  webmVp8: {
+    extension: "webm",
+    mimeType: "video/webm;codecs=vp8",
+  },
 };
 
 export const CONTROL_CONFIG = {

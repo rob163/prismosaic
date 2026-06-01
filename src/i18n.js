@@ -5,6 +5,7 @@ const STORAGE_KEY = "prismosaic-locale";
 const MESSAGES = {
   en: {
     aria: {
+      closeDialog: "Close dialog",
       controls: "Prismosaic controls",
       preview: "Prismosaic preview",
       projectLinks: "Project links",
@@ -13,7 +14,7 @@ const MESSAGES = {
     buttons: {
       downloadEmbed: "Download Embed ZIP",
       downloadPng: "Download PNG",
-      downloadWebm: "Download WebM",
+      downloadVideo: "Download Video",
       pause: "Pause",
       play: "Play",
       reroll: "Reroll",
@@ -38,7 +39,11 @@ const MESSAGES = {
       sourceJitter: "Source jitter",
       tileScale: "Tile scale",
       tilesPerFrame: "Tiles per frame",
+      videoFormat: "Video type",
       zoom: "Zoom",
+    },
+    dialogs: {
+      videoTitle: "Download Video",
     },
     groups: {
       export: "Export",
@@ -59,7 +64,7 @@ const MESSAGES = {
       gridSize:
         "Number of mosaic cells on the longer output side. The shorter side is calculated from the output ratio so tiles stay close to square.",
       language: "Switches the control language. The exported embed package remains English-only.",
-      loopDuration: "Duration of the recorded WebM loop. Longer clips take more time and create larger files.",
+      loopDuration: "Duration of the recorded video loop. Longer clips take more time and create larger files.",
       offsetX: "Moves the normalized source image left or right inside the output frame.",
       offsetY: "Moves the normalized source image up or down inside the output frame.",
       output:
@@ -67,6 +72,7 @@ const MESSAGES = {
       sourceJitter: "Random offset between a tile position and the source crop position. 0 keeps source sampling aligned.",
       tileScale: "Relative tile crop and draw size. Above 1 overlaps neighboring cells; below 1 reveals the background between tiles.",
       tilesPerFrame: "How many random cells are replaced on each animation tick. Higher values produce faster visual change.",
+      videoFormat: "Video container and codec for the downloaded loop. Unsupported options are disabled by the browser.",
       zoom: "Scales the uploaded image before mosaic sampling. Use this to crop tighter or reveal more of the source photo.",
     },
     links: {
@@ -103,6 +109,11 @@ const MESSAGES = {
         square: "Square",
         story: "Story / Reel",
       },
+      videoFormat: {
+        mp4H264: "MP4 (H.264)",
+        webmVp8: "WebM (VP8)",
+        webmVp9: "WebM (VP9)",
+      },
     },
     status: {
       embedExported: "Embed ZIP exported",
@@ -113,7 +124,8 @@ const MESSAGES = {
       ready: ({ width, height, count }) =>
         `${width}x${height}, ${count} source image${count === 1 ? "" : "s"}`,
       recording: ({ percent }) => `Recording ${percent}%`,
-      webmExported: "WebM loop exported",
+      unsupportedVideoFormat: "This browser does not support the selected video type.",
+      videoExported: "Video loop exported",
     },
     upload: "Upload 1-3 images",
     units: {
@@ -128,6 +140,7 @@ const MESSAGES = {
   },
   zh: {
     aria: {
+      closeDialog: "关闭弹窗",
       controls: "Prismosaic 控制面板",
       preview: "Prismosaic 预览",
       projectLinks: "项目链接",
@@ -136,7 +149,7 @@ const MESSAGES = {
     buttons: {
       downloadEmbed: "下载嵌入 ZIP",
       downloadPng: "下载 PNG",
-      downloadWebm: "下载 WebM",
+      downloadVideo: "下载视频",
       pause: "暂停",
       play: "播放",
       reroll: "重排",
@@ -161,7 +174,11 @@ const MESSAGES = {
       sourceJitter: "取样抖动",
       tileScale: "色块缩放",
       tilesPerFrame: "每帧色块数",
+      videoFormat: "视频类型",
       zoom: "缩放",
+    },
+    dialogs: {
+      videoTitle: "下载视频",
     },
     groups: {
       export: "导出",
@@ -177,13 +194,14 @@ const MESSAGES = {
       framing: "上传图片映射到输出画布的方式。填满裁切会覆盖整张画面，完整适配会保留整张照片。",
       gridSize: "输出长边上的马赛克格数。短边会按输出比例计算，让色块接近正方形。",
       language: "切换控制界面语言。导出的嵌入包仍保持英文。",
-      loopDuration: "录制 WebM 循环的时长。时间越长，导出越慢，文件也越大。",
+      loopDuration: "录制视频循环的时长。时间越长，导出越慢，文件也越大。",
       offsetX: "将归一化后的源图像在输出画面中左右移动。",
       offsetY: "将归一化后的源图像在输出画面中上下移动。",
       output: "最终导出画布尺寸。Story/Reel 适合竖屏视频，Portrait 适合信息流，Square 适合头像和方图。",
       sourceJitter: "色块位置和源图取样位置之间的随机偏移。0 表示保持对齐取样。",
       tileScale: "色块裁切和绘制的相对大小。大于 1 会覆盖邻近格，小于 1 会露出背景间隙。",
       tilesPerFrame: "每次动画更新替换的随机色块数量。数值越高，视觉变化越快。",
+      videoFormat: "下载循环视频的容器和编码。浏览器不支持的选项会被禁用。",
       zoom: "在马赛克取样前缩放上传图像。可用于更紧裁切或展示更多原图。",
     },
     links: {
@@ -220,6 +238,11 @@ const MESSAGES = {
         square: "方形",
         story: "Story / Reel",
       },
+      videoFormat: {
+        mp4H264: "MP4 (H.264)",
+        webmVp8: "WebM (VP8)",
+        webmVp9: "WebM (VP9)",
+      },
     },
     status: {
       embedExported: "嵌入 ZIP 已导出",
@@ -229,7 +252,8 @@ const MESSAGES = {
       preparingEmbed: "正在准备嵌入 ZIP...",
       ready: ({ width, height, count }) => `${width}x${height}，${count} 张源图像`,
       recording: ({ percent }) => `正在录制 ${percent}%`,
-      webmExported: "WebM 循环已导出",
+      unsupportedVideoFormat: "此浏览器不支持所选视频类型。",
+      videoExported: "视频循环已导出",
     },
     upload: "上传 1-3 张图像",
     units: {

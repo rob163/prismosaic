@@ -72,7 +72,7 @@ directly without running Jekyll.
 - Generate a color-deflected tile mosaic.
 - Preview a static composition or an animated loop.
 - Download a PNG still.
-- Download a WebM loop.
+- Download a video loop with configurable duration and common social upload formats.
 
 ## Configuration
 
@@ -101,6 +101,6 @@ as a convenient local static file server during development.
 
 ## Notes
 
-WebM export uses `MediaRecorder` and `canvas.captureStream()`, so support depends
-on the browser. Chromium-based browsers currently provide the most reliable
-experience.
+Video export uses `MediaRecorder` and `canvas.captureStream()`, so available
+MP4/WebM options depend on the browser. Chromium-based browsers currently provide
+the most reliable experience.

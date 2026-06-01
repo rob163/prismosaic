@@ -1,15 +1,16 @@
 import { normalizeImages, loadImageFile, createDemoImage } from "./image-fit.js?v=20260530-5";
-import { translate, getInitialLocale, isSupportedLocale, persistLocale, SUPPORTED_LOCALES } from "./i18n.js?v=20260601-2";
+import { translate, getInitialLocale, isSupportedLocale, persistLocale, SUPPORTED_LOCALES } from "./i18n.js?v=20260601-3";
 import { MosaicEngine } from "./mosaic-engine.js?v=20260530-5";
 import { exportNextEmbedZip } from "./embed-export.js?v=20260531-3";
-import { downloadBlob, downloadCanvasPng, recordCanvasWebm, timestampedFilename } from "./media-export.js?v=20260531-2";
+import { downloadBlob, downloadCanvasPng, recordCanvasVideo, timestampedFilename } from "./media-export.js?v=20260601-1";
 import {
   APP_VERSION,
   COLOR_PRESETS,
   CONTROL_CONFIG,
   DEFAULT_SETTINGS,
   OUTPUT_PRESETS,
-} from "./config.js?v=20260601-1";
+  VIDEO_EXPORT_PRESETS,
+} from "./config.js?v=20260601-2";
 
 const elements = {
   canvas: document.querySelector("#mosaic"),
@@ -53,10 +54,13 @@ const elements = {
   offsetYNumber: document.querySelector("#offsetYNumber"),
   loopDuration: document.querySelector("#loopDuration"),
   loopDurationNumber: document.querySelector("#loopDurationNumber"),
+  videoFormat: document.querySelector("#videoFormat"),
+  videoDialog: document.querySelector("#videoDialog"),
+  confirmVideoDownload: document.querySelector("#confirmVideoDownload"),
   reroll: document.querySelector("#reroll"),
   toggle: document.querySelector("#toggle"),
   downloadPng: document.querySelector("#downloadPng"),
-  downloadWebm: document.querySelector("#downloadWebm"),
+  downloadVideo: document.querySelector("#downloadVideo"),
   downloadEmbed: document.querySelector("#downloadEmbed"),
 };
 
@@ -82,6 +86,7 @@ async function initialize() {
   applyLocale();
   applyControlConfig();
   populateSelects({ applyPreset: true });
+  populateVideoFormatSelect();
   bindEvents();
   observeStageResize();
   window.addEventListener("resize", handleViewportResize);
@@ -314,6 +319,7 @@ function bindEvents() {
     state.locale = locale;
     applyLocale({ persist: true });
     populateSelects();
+    populateVideoFormatSelect();
     updateChannelSourceOptions();
     updateLabels();
     updateToggleLabel();
@@ -336,7 +342,8 @@ function bindEvents() {
   elements.reroll.addEventListener("click", () => engine.renderStill());
   elements.toggle.addEventListener("click", togglePlayback);
   elements.downloadPng.addEventListener("click", () => downloadCanvasPng(elements.canvas));
-  elements.downloadWebm.addEventListener("click", downloadWebm);
+  elements.downloadVideo.addEventListener("click", openVideoDialog);
+  elements.confirmVideoDownload.addEventListener("click", downloadVideo);
   elements.downloadEmbed.addEventListener("click", downloadEmbedZip);
 }
 
@@ -412,6 +419,7 @@ function readSettings() {
   state.settings.offsetX = Number(elements.offsetX.value) / 100;
   state.settings.offsetY = Number(elements.offsetY.value) / 100;
   state.settings.loopDuration = Number(elements.loopDuration.value);
+  state.settings.videoFormat = elements.videoFormat.value || state.settings.videoFormat;
 }
 
 function applyEngineSettings() {
@@ -498,32 +506,77 @@ function updateToggleLabel() {
   elements.toggle.textContent = state.running ? t("buttons.pause") : t("buttons.play");
 }
 
-async function downloadWebm() {
+function populateVideoFormatSelect() {
+  const selectedVideoFormat = elements.videoFormat.value || state.settings.videoFormat;
+  elements.videoFormat.replaceChildren();
+
+  for (const key of Object.keys(VIDEO_EXPORT_PRESETS)) {
+    const preset = VIDEO_EXPORT_PRESETS[key];
+    const option = new Option(t(`options.videoFormat.${key}`), key);
+    option.disabled = !isVideoMimeTypeSupported(preset.mimeType);
+    elements.videoFormat.add(option);
+  }
+
+  const preferred = [...elements.videoFormat.options].find((option) => option.value === selectedVideoFormat && !option.disabled);
+  const fallback = [...elements.videoFormat.options].find((option) => !option.disabled);
+  elements.videoFormat.value = preferred?.value || fallback?.value || selectedVideoFormat;
+  state.settings.videoFormat = elements.videoFormat.value;
+}
+
+function isVideoMimeTypeSupported(mimeType) {
+  return typeof MediaRecorder !== "undefined" && MediaRecorder.isTypeSupported(mimeType);
+}
+
+function openVideoDialog() {
+  if (state.recording) return;
+  readSettings();
+  populateVideoFormatSelect();
+  if (typeof elements.videoDialog.showModal === "function") {
+    elements.videoDialog.showModal();
+    return;
+  }
+  downloadVideo();
+}
+
+async function downloadVideo() {
   if (state.recording) return;
 
+  readSettings();
+  const videoPreset = VIDEO_EXPORT_PRESETS[state.settings.videoFormat];
+  if (!videoPreset || !isVideoMimeTypeSupported(videoPreset.mimeType)) {
+    setStatus("status.unsupportedVideoFormat");
+    return;
+  }
+
+  if (elements.videoDialog.open && typeof elements.videoDialog.close === "function") {
+    elements.videoDialog.close();
+  }
   state.recording = true;
-  elements.downloadWebm.disabled = true;
+  elements.downloadVideo.disabled = true;
+  elements.confirmVideoDownload.disabled = true;
   const wasRunning = state.running;
   engine.stop();
   engine.renderStill();
 
   try {
-    const blob = await recordCanvasWebm(elements.canvas, {
+    const blob = await recordCanvasVideo(elements.canvas, {
       duration: state.settings.loopDuration,
       fps: state.settings.fps,
+      mimeType: videoPreset.mimeType,
       onFrame: () => engine.tick(),
       onStatus: (message) => {
         const match = message.match(/\d+/);
         setStatus("status.recording", { percent: match ? Number(match[0]) : 0 });
       },
     });
-    downloadBlob(blob, timestampedFilename("prismosaic-loop", "webm"));
-    setStatus("status.webmExported");
+    downloadBlob(blob, timestampedFilename("prismosaic-loop", videoPreset.extension));
+    setStatus("status.videoExported");
   } catch (error) {
     elements.status.textContent = error.message;
   } finally {
     state.recording = false;
-    elements.downloadWebm.disabled = false;
+    elements.downloadVideo.disabled = false;
+    elements.confirmVideoDownload.disabled = false;
     state.running = wasRunning;
     if (state.running) engine.start();
   }
