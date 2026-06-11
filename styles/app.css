@@ -301,9 +301,53 @@ button:disabled {
 }
 
 #downloadPng,
-#downloadWebm,
+#downloadVideo,
 #downloadEmbed {
   grid-column: span 2;
+}
+
+.video-dialog {
+  width: min(360px, calc(100vw - 28px));
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+}
+
+.video-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.58);
+}
+
+.dialog-panel {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+}
+
+.dialog-header,
+.dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.icon-button {
+  width: 32px;
+  min-height: 32px;
+  padding: 0;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.dialog-actions {
+  justify-content: flex-end;
+}
+
+.dialog-actions button {
+  width: auto;
+  min-width: 150px;
 }
 
 @media (max-width: 900px) {
@@ -357,7 +401,7 @@ button:disabled {
   }
 
   #downloadPng,
-  #downloadWebm,
+  #downloadVideo,
   #downloadEmbed {
     grid-column: auto;
   }

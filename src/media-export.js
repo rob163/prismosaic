@@ -12,8 +12,8 @@ export function downloadCanvasPng(canvas, filename = timestampedFilename("prismo
   }, "image/png");
 }
 
-export async function recordCanvasWebm(canvas, options) {
-  const { duration, fps, onFrame, onStatus } = options;
+export async function recordCanvasVideo(canvas, options) {
+  const { duration, fps, mimeType, onFrame, onStatus } = options;
   if (!canvas.captureStream || typeof MediaRecorder === "undefined") {
     throw new Error("This browser does not support canvas video recording.");
   }
@@ -21,10 +21,13 @@ export async function recordCanvasWebm(canvas, options) {
   const watermark = shouldApplyExportWatermark();
   const captureCanvas = watermark ? createWatermarkedCanvas(canvas) : canvas;
   const stream = captureCanvas.captureStream(fps);
-  const mimeType = pickMimeType();
+  const recordingMimeType = pickMimeType(mimeType);
+  if (mimeType && recordingMimeType !== mimeType) {
+    throw new Error("This browser does not support the selected video type.");
+  }
   const recorderOptions = {
     videoBitsPerSecond: getVideoBitrate(canvas, fps),
-    ...(mimeType ? { mimeType } : {}),
+    ...(recordingMimeType ? { mimeType: recordingMimeType } : {}),
   };
   const recorder = new MediaRecorder(stream, recorderOptions);
   const chunks = [];
@@ -52,8 +55,10 @@ export async function recordCanvasWebm(canvas, options) {
   await stopped;
   stream.getTracks().forEach((track) => track.stop());
 
-  return new Blob(chunks, { type: mimeType || "video/webm" });
+  return new Blob(chunks, { type: recordingMimeType || "video/webm" });
 }
+
+export const recordCanvasWebm = recordCanvasVideo;
 
 export function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
@@ -79,7 +84,8 @@ export function timestampedFilename(baseName, extension, date = new Date()) {
   return `${baseName}-${timestamp}.${extension}`;
 }
 
-function pickMimeType() {
+function pickMimeType(preferredMimeType) {
+  if (preferredMimeType && MediaRecorder.isTypeSupported(preferredMimeType)) return preferredMimeType;
   const candidates = [
     "video/webm;codecs=vp9",
     "video/webm;codecs=vp8",

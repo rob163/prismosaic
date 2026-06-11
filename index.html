@@ -211,22 +211,11 @@
 
         <section class="control-group">
           <div class="section-title" data-i18n="groups.export">Export</div>
-          <label title="Duration of the recorded WebM loop. Longer clips take more time and create larger files." data-i18n-title="hints.loopDuration">
-            <span class="row">
-              <span><span data-i18n="fields.loopDuration">Loop duration</span> <span class="hint">?</span></span>
-              <span class="value-field">
-                <input id="loopDurationNumber" type="number" class="numeric-input" />
-                <span class="value-unit" data-i18n="units.seconds">s</span>
-              </span>
-            </span>
-            <input id="loopDuration" type="range" min="1" max="10" value="5" step="1" />
-          </label>
-
           <div class="button-grid">
             <button id="toggle" type="button" data-i18n="buttons.pause">Pause</button>
             <button id="reroll" type="button" data-i18n="buttons.reroll">Reroll</button>
             <button id="downloadPng" type="button" data-i18n="buttons.downloadPng">Download PNG</button>
-            <button id="downloadWebm" type="button" data-i18n="buttons.downloadWebm">Download WebM</button>
+            <button id="downloadVideo" type="button" data-i18n="buttons.downloadVideo">Download Video</button>
             <button id="downloadEmbed" type="button" data-i18n="buttons.downloadEmbed">Download Embed ZIP</button>
           </div>
         </section>
@@ -238,6 +227,35 @@
       </aside>
     </main>
 
-    <script type="module" src="src/main.js?v=20260601-2"></script>
+    <dialog id="videoDialog" class="video-dialog">
+      <form method="dialog" class="dialog-panel">
+        <div class="dialog-header">
+          <div class="section-title" data-i18n="dialogs.videoTitle">Download Video</div>
+          <button id="closeVideoDialog" class="icon-button" value="cancel" aria-label="Close" data-i18n-aria-label="aria.closeDialog">×</button>
+        </div>
+
+        <label title="Duration of the recorded video loop. Longer clips take more time and create larger files." data-i18n-title="hints.loopDuration">
+          <span class="row">
+            <span><span data-i18n="fields.loopDuration">Loop duration</span> <span class="hint">?</span></span>
+            <span class="value-field">
+              <input id="loopDurationNumber" type="number" class="numeric-input" />
+              <span class="value-unit" data-i18n="units.seconds">s</span>
+            </span>
+          </span>
+          <input id="loopDuration" type="range" min="1" max="10" value="5" step="1" />
+        </label>
+
+        <label title="Video container and codec for the downloaded loop. Unsupported options are disabled by the browser." data-i18n-title="hints.videoFormat">
+          <span><span data-i18n="fields.videoFormat">Video type</span> <span class="hint">?</span></span>
+          <select id="videoFormat"></select>
+        </label>
+
+        <div class="dialog-actions">
+          <button type="button" id="confirmVideoDownload" data-i18n="buttons.downloadVideo">Download Video</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script type="module" src="src/main.js?v=20260601-3"></script>
   </body>
 </html>
