@@ -7,6 +7,9 @@ still images, looping videos, or a small embeddable web package.
 
 [Open the live Prismosaic app](https://rob163.github.io/prismosaic/)
 
+Netlify deployment is also supported through the committed `netlify.toml`
+configuration.
+
 ## What You Can Make
 
 - Profile images, posters, thumbnails, and social posts in common export ratios.
@@ -37,6 +40,14 @@ Then open:
 ```text
 http://localhost:8080
 ```
+
+To run the same static app through Netlify Dev:
+
+```bash
+netlify dev
+```
+
+Then open the local Netlify URL printed by the CLI.
 
 From the parent repository:
 
