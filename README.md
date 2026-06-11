@@ -5,14 +5,21 @@ still images, looping videos, or a small embeddable web package.
 
 [![Prismosaic default mosaic animation](docs/demo/prismosaic-defaults.gif)](https://rob163.github.io/prismosaic/)
 
-[Open the live Prismosaic app](https://rob163.github.io/prismosaic/)
+[Start creating in the live Prismosaic app](https://rob163.github.io/prismosaic/)
+
+## How It Works
+
+1. Upload one to three images.
+2. Pick an output ratio for the canvas.
+3. Tune the mosaic grid, color preset, animation speed, tile scale, and source jitter.
+4. Download a still image, video loop, or embed ZIP.
 
 ## What You Can Make
 
 - Profile images, posters, thumbnails, and social posts in common export ratios.
 - Short animated loops for reels, stories, and visual experiments.
 - Color-shifted mosaics from one to three source images.
-- Downloadable PNG, WebM, and embed ZIP outputs.
+- Downloadable PNG, MP4/WebM, and embed ZIP outputs.
 
 ## Why It Is Useful
 
