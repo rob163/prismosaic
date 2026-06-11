@@ -1,18 +1,37 @@
 # Prismosaic
 
-Prismosaic is a browser-only mosaic generator for turning personal photos into
-color-shifted still images and short looping videos.
+Prismosaic turns your photos into colorful tiled mosaics that can be saved as
+still images, looping videos, or a small embeddable web package. It runs entirely
+in the browser, so your images stay on your device.
 
-The demo is intentionally self-contained:
+![Prismosaic interface with a generated mosaic preview](docs/screenshots/numeric-inputs.png)
+
+## What You Can Make
+
+- Profile images, posters, thumbnails, and social posts in common export ratios.
+- Short animated loops for reels, stories, and visual experiments.
+- Color-shifted mosaics from one to three source images.
+- Downloadable PNG, WebM, and embed ZIP outputs.
+
+## Why It Is Useful
+
+Prismosaic is designed for quick creative iteration:
+
+- Upload images and see the mosaic update immediately.
+- Switch between square, portrait, story, and landscape canvases.
+- Tune grid size, animation speed, color strength, tile scale, and source jitter.
+- Choose how source images fit the canvas before generating the mosaic.
+- Export the result without sending photos to a server.
+
+## Privacy
 
 - No backend.
 - No image upload to a server.
 - No build step required.
-- Works on GitHub Pages.
 
 All image processing happens locally in the user's browser with Canvas.
 
-## Run Locally
+## Try It Locally
 
 From this directory:
 
@@ -42,6 +61,29 @@ Use only one of those URL patterns. If the server is started from inside
 `prismosaic/`, open `/`. If the server is started from the parent repository,
 open `/prismosaic/`.
 
+## Output Ratios
+
+- Square: 1080 x 1080
+- Portrait: 1080 x 1350
+- Story/Reel: 1080 x 1920
+- Landscape: 1920 x 1080
+
+## Browser Support
+
+PNG export works in modern browsers. Video export uses `MediaRecorder` and
+`canvas.captureStream()`, so available MP4/WebM options depend on the browser.
+Chromium-based browsers currently provide the most reliable video export
+experience.
+
+## For Developers
+
+The app is intentionally self-contained:
+
+- Static HTML, CSS, and JavaScript.
+- No backend service.
+- No frontend build step.
+- Automated syntax checks and Node tests.
+
 ## Publish on GitHub Pages
 
 Prismosaic is ready to publish from this repository.
@@ -65,14 +107,8 @@ https://rob163.github.io/prismosaic/
 This directory also includes `.nojekyll` so GitHub Pages serves the static files
 directly without running Jekyll.
 
-## Features
-
-- Upload one to three images.
-- Normalize images of different dimensions into a selected social output ratio.
-- Generate a color-deflected tile mosaic.
-- Preview a static composition or an animated loop.
-- Download a PNG still.
-- Download a video loop with configurable duration and common social upload formats.
+GitHub Pages must be available for the repository's current plan and visibility.
+For example, Pages on private repositories requires a paid GitHub plan.
 
 ## Configuration
 
@@ -91,16 +127,3 @@ That file defines:
 
 The web app does not depend on Python for image processing. Python is only used
 as a convenient local static file server during development.
-
-## Output Ratios
-
-- Square: 1080 x 1080
-- Portrait: 1080 x 1350
-- Story/Reel: 1080 x 1920
-- Landscape: 1920 x 1080
-
-## Notes
-
-Video export uses `MediaRecorder` and `canvas.captureStream()`, so available
-MP4/WebM options depend on the browser. Chromium-based browsers currently provide
-the most reliable experience.
