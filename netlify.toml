@@ -1,0 +1,15 @@
+[build]
+  command = "npm run check && npm test"
+  publish = "."
+
+[dev]
+  command = "npm start"
+  port = 8888
+  targetPort = 8080
+  framework = "#static"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
