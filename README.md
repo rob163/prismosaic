@@ -3,6 +3,8 @@
 Prismosaic turns your photos into colorful tiled mosaics that can be saved as
 still images, looping videos, or a small embeddable web package.
 
+[![Prismosaic default mosaic animation](docs/demo/prismosaic-defaults.gif)](https://rob163.github.io/prismosaic/)
+
 [Open the live Prismosaic app](https://rob163.github.io/prismosaic/)
 
 ## What You Can Make
