@@ -4,6 +4,7 @@ import {
   pickChannelIndex,
   resetProtectionMap,
 } from "./channel-scheduler.js?v=20260531-1";
+import { getAnimationTickIntervalMs } from "./config.js?v=20260614-1";
 
 export class MosaicEngine {
   constructor(canvas) {
@@ -46,7 +47,7 @@ export class MosaicEngine {
     this.stop();
     this.timer = window.setInterval(() => {
       this.drawRandomTiles(this.settings.tilesPerFrame);
-    }, this.settings.frameInterval);
+    }, getAnimationTickIntervalMs());
   }
 
   stop() {
