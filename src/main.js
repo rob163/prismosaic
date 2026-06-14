@@ -5,12 +5,13 @@ import { exportNextEmbedZip } from "./embed-export.js?v=20260531-3";
 import { downloadBlob, downloadCanvasPng, recordCanvasVideo, timestampedFilename } from "./media-export.js?v=20260601-1";
 import {
   APP_VERSION,
+  ANIMATION_FPS,
   COLOR_PRESETS,
   CONTROL_CONFIG,
   DEFAULT_SETTINGS,
   OUTPUT_PRESETS,
   VIDEO_EXPORT_PRESETS,
-} from "./config.js?v=20260601-2";
+} from "./config.js?v=20260614-1";
 
 const elements = {
   canvas: document.querySelector("#mosaic"),
@@ -38,8 +39,6 @@ const elements = {
   gridValue: document.querySelector("#gridValue"),
   tilesPerFrame: document.querySelector("#tilesPerFrame"),
   tilesPerFrameNumber: document.querySelector("#tilesPerFrameNumber"),
-  frameInterval: document.querySelector("#frameInterval"),
-  frameIntervalNumber: document.querySelector("#frameIntervalNumber"),
   tileScale: document.querySelector("#tileScale"),
   tileScaleNumber: document.querySelector("#tileScaleNumber"),
   sourceJitter: document.querySelector("#sourceJitter"),
@@ -411,7 +410,6 @@ function readSettings() {
   );
   state.settings.gridSize = Number(elements.grid.value);
   state.settings.tilesPerFrame = Number(elements.tilesPerFrame.value);
-  state.settings.frameInterval = Number(elements.frameInterval.value);
   state.settings.tileScale = Number(elements.tileScale.value) / 100;
   state.settings.sourceJitter = Number(elements.sourceJitter.value) / 100;
   state.settings.colorStrength = Number(elements.colorStrength.value) / 100;
@@ -427,7 +425,6 @@ function applyEngineSettings() {
   engine.configure({
     gridSize: state.settings.gridSize,
     tilesPerFrame: state.settings.tilesPerFrame,
-    frameInterval: state.settings.frameInterval,
     tileScale: state.settings.tileScale,
     sourceJitter: state.settings.sourceJitter,
     colorStrength: state.settings.colorStrength,
@@ -602,7 +599,7 @@ async function downloadEmbedZip() {
         settings: {
           gridSize: state.settings.gridSize,
           tilesPerFrame: state.settings.tilesPerFrame,
-          frameInterval: state.settings.frameInterval,
+          fps: ANIMATION_FPS,
           tileScale: state.settings.tileScale,
           sourceJitter: state.settings.sourceJitter,
           colorStrength: state.settings.colorStrength,

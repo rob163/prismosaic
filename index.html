@@ -64,6 +64,11 @@
 
         <section class="control-group">
           <div class="section-title" data-i18n="groups.imageFit">Image Fit</div>
+          <p class="section-help">
+            <a href="https://robtools.netlify.app/image-overlay/" rel="noreferrer" target="_blank" data-i18n="links.imageAlignTool">
+              Image align tool
+            </a>
+          </p>
           <label
             title="How uploaded images are mapped into the output canvas. Fill crop covers the full frame; Fit full image preserves the entire photo."
             data-i18n-title="hints.framing"
@@ -161,18 +166,7 @@
               <span><span data-i18n="fields.tilesPerFrame">Tiles per frame</span> <span class="hint">?</span></span>
               <input id="tilesPerFrameNumber" type="number" class="numeric-input" />
             </span>
-            <input id="tilesPerFrame" type="range" min="1" max="220" value="48" step="1" />
-          </label>
-
-          <label title="Delay between animation ticks. Smaller values update faster." data-i18n-title="hints.frameInterval">
-            <span class="row">
-              <span><span data-i18n="fields.frameInterval">Frame interval</span> <span class="hint">?</span></span>
-              <span class="value-field">
-                <input id="frameIntervalNumber" type="number" class="numeric-input" />
-                <span class="value-unit" data-i18n="units.milliseconds">ms</span>
-              </span>
-            </span>
-            <input id="frameInterval" type="range" min="20" max="500" value="80" step="10" />
+            <input id="tilesPerFrame" type="range" min="1" max="220" value="8" step="1" />
           </label>
 
           <label title="Relative tile crop and draw size. Above 1 overlaps neighboring cells; below 1 reveals the background between tiles." data-i18n-title="hints.tileScale">
@@ -256,6 +250,6 @@
       </form>
     </dialog>
 
-    <script type="module" src="src/main.js?v=20260601-3"></script>
+    <script type="module" src="src/main.js?v=20260614-1"></script>
   </body>
 </html>

@@ -1,5 +1,11 @@
 export const APP_VERSION = "2026.06.01.1";
 
+export const ANIMATION_FPS = 30;
+
+export function getAnimationTickIntervalMs(fps = ANIMATION_FPS) {
+  return 1000 / fps;
+}
+
 export const OUTPUT_PRESETS = {
   square: { label: "Square", width: 1080, height: 1080 },
   portrait: { label: "Portrait", width: 1080, height: 1350 },
@@ -43,8 +49,7 @@ export const DEFAULT_SETTINGS = {
   offsetX: 0,
   offsetY: 0,
   gridSize: 12,
-  tilesPerFrame: 48,
-  frameInterval: 80,
+  tilesPerFrame: 8,
   tileScale: 0.92,
   sourceJitter: 0.08,
   colorStrength: 0.28,
@@ -52,7 +57,7 @@ export const DEFAULT_SETTINGS = {
   channelSources: [0, 0, 0],
   loopDuration: 5,
   videoFormat: "mp4H264",
-  fps: 30,
+  fps: ANIMATION_FPS,
 };
 
 export const VIDEO_EXPORT_PRESETS = {
@@ -80,7 +85,6 @@ export const CONTROL_CONFIG = {
   offsetY: { min: -50, max: 50, step: 1, valueScale: 100 },
   grid: { min: 8, max: 64, step: 1, valueKey: "gridSize" },
   tilesPerFrame: { min: 1, max: 220, step: 1 },
-  frameInterval: { min: 20, max: 500, step: 10 },
   tileScale: { min: 70, max: 180, step: 1, valueScale: 100, numberStep: 0.01, numberDecimals: 2 },
   sourceJitter: { min: 0, max: 100, step: 1, valueScale: 100 },
   colorStrength: { min: 0, max: 80, step: 1, valueScale: 100 },

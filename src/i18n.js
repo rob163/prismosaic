@@ -28,7 +28,6 @@ const MESSAGES = {
       background: "Background",
       colorPreset: "Color preset",
       colorStrength: "Color strength",
-      frameInterval: "Frame interval",
       framing: "Framing",
       gridSize: "Grid size",
       language: "Language",
@@ -58,7 +57,6 @@ const MESSAGES = {
       colorPreset:
         "Three-color tint set used across the mosaic sources. Different presets change the character of the color deflection.",
       colorStrength: "Opacity of the selected color tint applied to each tile after the photo tile is drawn.",
-      frameInterval: "Delay between animation ticks. Smaller values update faster.",
       framing:
         "How uploaded images are mapped into the output canvas. Fill crop covers the full frame; Fit full image preserves the entire photo.",
       gridSize:
@@ -78,6 +76,7 @@ const MESSAGES = {
     links: {
       about: "About",
       github: "GitHub",
+      imageAlignTool: "Image align tool — overlay photos to match framing",
     },
     options: {
       background: {
@@ -164,7 +163,6 @@ const MESSAGES = {
       background: "背景",
       colorPreset: "色彩预设",
       colorStrength: "色彩强度",
-      frameInterval: "帧间隔",
       framing: "构图方式",
       gridSize: "网格尺寸",
       language: "语言",
@@ -191,7 +189,6 @@ const MESSAGES = {
       channelControls: "每个色彩通道都可以设置颜色，并从任意上传图像取样。设为关闭即可从随机色块选择中移除。",
       colorPreset: "用于马赛克取样的三色染色组合。不同预设会改变色彩偏移的风格。",
       colorStrength: "照片色块绘制后叠加的颜色不透明度。",
-      frameInterval: "动画更新的时间间隔。数值越小，变化越快。",
       framing: "上传图片映射到输出画布的方式。填满裁切会覆盖整张画面，完整适配会保留整张照片。",
       gridSize: "输出长边上的马赛克格数。短边会按输出比例计算，让色块接近正方形。",
       language: "切换控制界面语言。导出的嵌入包仍保持英文。",
@@ -208,6 +205,7 @@ const MESSAGES = {
     links: {
       about: "关于",
       github: "GitHub",
+      imageAlignTool: "图像对齐工具 — 叠加照片以匹配构图",
     },
     options: {
       background: {

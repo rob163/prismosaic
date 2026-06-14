@@ -114,7 +114,7 @@ export type PrismosaicRecipe = {
   settings: {
     gridSize: number;
     tilesPerFrame: number;
-    frameInterval: number;
+    fps: number;
     tileScale: number;
     sourceJitter: number;
     colorStrength: number;
@@ -248,9 +248,10 @@ export function mountPrismosaicLoop(
 
   function start() {
     stop();
+    const tickInterval = getRecipeTickIntervalMs(activeRecipe.settings);
     timer = window.setInterval(() => {
       drawRandomTiles(activeRecipe.settings.tilesPerFrame);
-    }, activeRecipe.settings.frameInterval);
+    }, tickInterval);
   }
 
   function stop() {
@@ -432,6 +433,19 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 
 function joinAssetPath(basePath: string, asset: string) {
   return \`\${basePath.replace(/\\/$/, "")}/\${asset.replace(/^\\//, "")}\`;
+}
+
+function getRecipeTickIntervalMs(settings: PrismosaicRecipe["settings"]) {
+  if (typeof settings.fps === "number" && settings.fps > 0) {
+    return 1000 / settings.fps;
+  }
+
+  const legacyInterval = (settings as { frameInterval?: number }).frameInterval;
+  if (typeof legacyInterval === "number" && legacyInterval > 0) {
+    return legacyInterval;
+  }
+
+  return 1000 / 30;
 }
 
 function getActiveChannels(recipe: PrismosaicRecipe, sources: LoadedSource[]) {

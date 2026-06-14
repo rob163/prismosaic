@@ -138,6 +138,21 @@ body {
   letter-spacing: 0.08em;
 }
 
+.section-help {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.section-help a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.section-help a:hover {
+  text-decoration: underline;
+}
+
 label {
   display: grid;
   gap: 5px;
